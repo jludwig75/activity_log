@@ -58,7 +58,6 @@ message TrackPoint {
     double longitude = 3;
     float altitude = 4;
     bool start_of_sgement = 5;
-    bool end_of_segment = 6;
 };
 
 message Empty {

@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
         }
     });
 
+    std::cout << "time,latitude,logitude,altitude\n";
     TrackPoint trackPoint;
     while (output.pop(trackPoint))
     {

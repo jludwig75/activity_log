@@ -11,15 +11,13 @@ public:
                double latitude,
                double longitude,
                float altitude,
-               bool startOfSegement,
-               bool endOfSegement)
+               bool startOfSegement)
         :
         time(time),
         latitude(latitude),
         longitude(longitude),
         altitude(altitude),
-        startOfSegement(startOfSegement),
-        endOfSegement(endOfSegement)
+        startOfSegement(startOfSegement)
     {
 
     }
@@ -28,5 +26,4 @@ public:
     double longitude;
     float altitude;
     bool startOfSegement;
-    bool endOfSegement;
 };

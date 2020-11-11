@@ -188,7 +188,7 @@ bool parseTrackPoint(DOMElement* trackPointElement, Container<TrackPoint>& strea
             altitude != std::numeric_limits<double>::infinity() &&
             time != 0);
 
-    stream.push(TrackPoint(std::chrono::system_clock::from_time_t(time), latitude, longitude, altitude, startOfSegment, false));
+    stream.push(TrackPoint(std::chrono::system_clock::from_time_t(time), latitude, longitude, altitude, startOfSegment));
     return true;
 }
 
