@@ -38,7 +38,7 @@ public:
     Displacement(double hDistance, double vDistance)
         :
         hDistance(hDistance),
-        vDistance(hDistance)
+        vDistance(vDistance)
     {
     }
     double hDistance;

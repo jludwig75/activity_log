@@ -23,6 +23,7 @@ public:
     std::chrono::system_clock::duration duration() const;
 
     std::string id;
+    std::string name;
     Container<TrackPoint> trackPoints;
     struct ActivityStats
     {

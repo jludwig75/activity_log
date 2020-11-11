@@ -65,6 +65,7 @@ bool ActivityDatabase::updateActivity(const std::string& activityId, const Activ
     }
 
     _activities[activityId] = activity;
+    return true;
 }
 
 bool ActivityDatabase::deleteActivity(const std::string& activityId)

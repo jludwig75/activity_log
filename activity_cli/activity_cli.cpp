@@ -139,7 +139,7 @@ public:
         std::cout << "Retrieved " << std::to_string(activities.size()) << " activities:\n";
         for (const auto& activity : activities)
         {
-            std::cout << "\t" <<  activity.id() << " - " << activity.name() << ": " << m_to_km(activity.totalDistance()) << " km, " << activity.totalAscent() << " meters ascent\n";
+            std::cout << "\t" <<  activity.id() << " - \"" << activity.name() << "\": " << m_to_km(activity.totalDistance()) << " km, " << activity.totalAscent() << " meters ascent\n";
         }
 
         return 0;
@@ -198,6 +198,55 @@ std::string csvEntry(const T& t)
 {
     return std::string(",") + std::to_string(t);
 }
+
+class EditCommandHandler : public CommandHandler
+{
+public:
+    EditCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args) override
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        Activity activity;
+        auto status = activityLog.getActivity(args[0], activity);
+        if (!status.ok())
+        {
+            std::cout << "Failed to find activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        status = activity.edit(args[1]);
+        if (!status.ok())
+        {
+            std::cout << "Failed to update activity name " << args[0] << std::endl;
+            return -1;
+        }
+
+        return 0;
+    }
+    virtual std::string syntax() const override
+    {
+        return name() + " <activity_id> <new_activity_name>";
+    }
+    virtual std::string description() const override
+    {
+        return "Update the name of an activity";
+    }
+    virtual size_t minNumberOfArgs() const override
+    {
+        return 2;
+    }
+    virtual size_t maxNumberOfArgs() const override
+    {
+        return 2;
+    }
+};
 
 class PlotCommandHandler : public CommandHandler
 {
@@ -383,6 +432,7 @@ private:
         { "list", std::make_shared<ListCommandHandler>("list") },
         { "stats", std::make_shared<StatsCommandHandler>("stats") },
         { "plot", std::make_shared<PlotCommandHandler>("plot") },
+        { "edit", std::make_shared<EditCommandHandler>("edit") },
         { "delete", std::make_shared<DeleteCommandHandler>("delete") }
     };
 };

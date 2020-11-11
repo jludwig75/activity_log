@@ -26,6 +26,7 @@ grpc::Status ActivityLog::uploadActivity(grpc::ServerContext* context,
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "Error parsing GPX data");
     }
 
+    newActivity.name = "New Activity";
     newActivity.analyzeTrackPoints();
 
     if (!_db.storeActivity(newActivity, newActivity.id))
@@ -127,6 +128,26 @@ grpc::Status ActivityLog::editActivity(grpc::ServerContext* context,
                             const activity_log::EditActivityRequest* request,
                             activity_log::Activity* activity)
 {
+    auto newName = request->name();
+
+    // Fail if not fields are set to be changed
+    if (newName.empty())
+    {
+        return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "No fields were specified for edit");
+    }
+
+    Activity retrievedActivity;
+    if (!_db.loadActivity(request->activity_id(), retrievedActivity))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity " + request->activity_id());
+    }
+
+    retrievedActivity.name = newName;
+    if (!_db.updateActivity(request->activity_id(), retrievedActivity))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error editing activity " + request->activity_id());
+    }
+
     return Status::OK;
 }
 
@@ -154,9 +175,10 @@ grpc::Status ActivityLog::downloadActivity(grpc::ServerContext* context,
 
 void ActivityLog::toProto(const Activity& activity, activity_log::Activity* protoActivity) const
 {
+    // id
     protoActivity->set_id(activity.id);
     // name
-    protoActivity->set_name("Activity");    // TODO: Do something with names
+    protoActivity->set_name(activity.name);
     // start_time
     protoActivity->set_start_time(std::chrono::system_clock::to_time_t(activity.start_time()));
     // duration
