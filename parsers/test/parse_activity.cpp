@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     TrackPoint trackPoint;
     while (output.pop(trackPoint))
     {
-        std::cout << std::chrono::system_clock::to_time_t(trackPoint.time) << std::endl;
+        std::cout << std::chrono::system_clock::to_time_t(trackPoint.time) << "," << trackPoint.latitude << "," << trackPoint.longitude << "," << trackPoint.altitude << std::endl;
     }
 
     parserThread.join();
