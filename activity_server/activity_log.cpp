@@ -112,6 +112,7 @@ grpc::Status ActivityLog::plotActivity(grpc::ServerContext* context,
                             const activity_log::ActivityRequest* request,
                             grpc::ServerWriter<activity_log::DataPoint>* stream)
 {
+    // TODO
     return Status::OK;
 }
 
@@ -120,6 +121,7 @@ grpc::Status ActivityLog::getActivityTrack(grpc::ServerContext* context,
                                 const activity_log::ActivityRequest* request,
                                 grpc::ServerWriter<activity_log::TrackPoint>* stream)
 {
+    // TODO
     return Status::OK;
 }
 
@@ -170,6 +172,7 @@ grpc::Status ActivityLog::downloadActivity(grpc::ServerContext* context,
                                 const activity_log::ActivityRequest*,
                                 grpc::ServerWriter<activity_log::ActivityFileChunk>* stream)
 {
+    // TODO
     return Status::OK;
 }
 
