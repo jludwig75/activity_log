@@ -359,6 +359,64 @@ public:
     }
 };
 
+class GetCommandHandler : public CommandHandler
+{
+public:
+    GetCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args) override
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        Activity activity;
+        auto status = activityLog.getActivity(args[0], activity);
+        if (!status.ok())
+        {
+            std::cout << "Failed to find activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        std::cout << "Activity " << activity.id() << std::endl;
+        std::cout << "\tName: " << activity.name() << std::endl;
+        // TODO: Make human readable
+        std::cout << "\tstartTime: " << std::chrono::system_clock::to_time_t(activity.startTime()) << std::endl;
+        // TODO: Show as HMS
+        std::cout << "\tduration: " << std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count() << std::endl;
+        std::cout << "\ttotalDistance: " << m_to_miles(activity.totalDistance()) << " miles" << std::endl;
+        std::cout << "\ttotalAscent: " << m_to_ft(activity.totalAscent()) << " feet" << std::endl;
+        std::cout << "\ttotalDescent: " << m_to_ft(activity.totalDescent()) << " feet" << std::endl;
+        std::cout << "\taverage_speed: " << mps_to_mph(activity.average_speed()) << " mph" << std::endl;
+        std::cout << "\tmax_speed: " << mps_to_mph(activity.max_speed()) << " mph" << std::endl;
+        std::cout << "\taverage_heart_rate: " << activity.average_heart_rate() << " bpm" << std::endl;
+        std::cout << "\tmax_heart_rate: " << activity.max_heart_rate() << " bpm" << std::endl;
+        std::cout << "\taverage_climbing_grade: " << 100.0 * activity.average_climbing_grade() << "%" << std::endl;
+        std::cout << "\taverage_descending_grade: " << 100.0 * activity.average_descending_grade() << "%" << std::endl;
+
+        return 0;
+    }
+    virtual std::string syntax() const override
+    {
+        return name() + " <activity_id>";
+    }
+    virtual std::string description() const override
+    {
+        return "retrieves activity details";
+    }
+    virtual size_t minNumberOfArgs() const override
+    {
+        return 1;
+    }
+    virtual size_t maxNumberOfArgs() const override
+    {
+        return 1;
+    }
+};
+
 class CommandRunner
 {
 public:
@@ -430,6 +488,7 @@ private:
     std::map<std::string, std::shared_ptr<CommandHandler> > _commands{
         { "upload", std::make_shared<UploadCommandHandler>("upload") },
         { "list", std::make_shared<ListCommandHandler>("list") },
+        { "get", std::make_shared<GetCommandHandler>("get") },
         { "stats", std::make_shared<StatsCommandHandler>("stats") },
         { "plot", std::make_shared<PlotCommandHandler>("plot") },
         { "edit", std::make_shared<EditCommandHandler>("edit") },

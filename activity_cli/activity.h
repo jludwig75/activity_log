@@ -26,8 +26,8 @@ public:
     float max_speed() const;
     uint32_t average_heart_rate() const;
     uint32_t max_heart_rate() const;
-    uint32_t average_climbing_grade() const;
-    uint32_t average_descending_grade() const;
+    float average_climbing_grade() const;
+    float average_descending_grade() const;
 
     grpc::Status edit(const std::string& newName);
     grpc::Status del();

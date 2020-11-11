@@ -81,12 +81,12 @@ uint32_t Activity::max_heart_rate() const
     return _activity.max_heart_rate();
 }
 
-uint32_t Activity::average_climbing_grade() const
+float Activity::average_climbing_grade() const
 {
     return _activity.average_climbing_grade();
 }
 
-uint32_t Activity::average_descending_grade() const
+float Activity::average_descending_grade() const
 {
     return _activity.average_descending_grade();
 }
