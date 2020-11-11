@@ -89,11 +89,11 @@ public:
         Activity newActivity;
         if (!activityLog.uploadActivity(args[0], newActivity).ok())
         {
-            std::cout << "Failed to upload activity \"" + args[0] + "\"\n";
+            std::cout << "Failed to upload activity \"" << args[0] << "\"\n";
             return -1;
         }
 
-        std::cout << "Successfully uploaded activity \"" + args[0] + "\"\n";
+        std::cout << "Successfully uploaded activity file \"" << args[0] << "\" as activity " << newActivity.id() + "\n";
 
         return 0;
     }
@@ -124,13 +124,13 @@ public:
     {
     }
 
-    virtual int runCommand(const std::vector<std::string>& args)
+    virtual int runCommand(const std::vector<std::string>& args) override
     {
         auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
         ActivityLog activityLog(channel);
 
         std::vector<Activity> activities;
-        activityLog.listActivities(std::chrono::system_clock::from_time_t(0), std::chrono::system_clock::now(), activities);
+        if (!activityLog.listActivities(std::chrono::system_clock::from_time_t(0), std::chrono::system_clock::now(), activities).ok())
         {
             std::cout << "Failed to list activities\n";
             return -1;
@@ -139,8 +139,47 @@ public:
         std::cout << "Retrieved " << std::to_string(activities.size()) << " activities:\n";
         for (const auto& activity : activities)
         {
-            std::cout << "\t" << activity.name() << ": " << m_to_km(activity.totalDistance()) << " km " << activity.totalAscent() << " meters ascent\n";
+            std::cout << "\t" <<  activity.id() << " - " << activity.name() << ": " << m_to_km(activity.totalDistance()) << " km, " << activity.totalAscent() << " meters ascent\n";
         }
+
+        return 0;
+    }
+    virtual std::string syntax() const override
+    {
+        return name();
+    }
+    virtual std::string description() const override
+    {
+        return "lists stored activities";
+    }
+};
+
+class StatsCommandHandler : public CommandHandler
+{
+public:
+    StatsCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args)
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        activity_log::Stats stats;
+        if (!activityLog.calculateStats(std::chrono::system_clock::from_time_t(0), std::chrono::system_clock::now(), stats).ok())
+        {
+            std::cout << "Failed to calculate stats\n";
+            return -1;
+        }
+
+        std::cout << "Cummulative activtiy stats:\n";
+        std::cout << "\tNumber of activities: " << stats.total_activities() << std::endl;
+        std::cout << "\tTime spent: " << stats.total_time() << " seconds" << std::endl;
+        std::cout << "\tTotal distance: " << m_to_km(stats.total_distance()) << " km" << std::endl;
+        std::cout << "\tTotla climbing: " << stats.total_ascent() << " meters" << std::endl;
 
         return 0;
     }
@@ -150,7 +189,76 @@ public:
     }
     virtual std::string description() const
     {
-        return "lists stored activities";
+        return "calculate cummulaive activity statistics";
+    }
+};
+
+template<typename T>
+std::string csvEntry(const T& t)
+{
+    return std::string(",") + std::to_string(t);
+}
+
+class PlotCommandHandler : public CommandHandler
+{
+public:
+    PlotCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args) override
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        Activity activity;
+        auto status = activityLog.getActivity(args[0], activity);
+        if (!status.ok())
+        {
+            std::cout << "Failed to find activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        std::vector<activity_log::DataPoint> dataPoints;
+        status = activity.plot(dataPoints);
+        if (!status.ok())
+        {
+            std::cout << "Failed to get data points for activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        std::cout << "time,altitude,cummulative_distance,speed,grade,heart_rate,cummulative_ascent,cummulative_descent\n";
+        for (const auto& dataPoint : dataPoints)
+        {
+            std::cout << dataPoint.time() <<
+                        csvEntry(dataPoint.altitude()) <<
+                        csvEntry(dataPoint.cummulative_distance()) <<
+                        csvEntry(dataPoint.speed()) <<
+                        csvEntry(dataPoint.grade()) <<
+                        csvEntry(dataPoint.heart_rate()) <<
+                        csvEntry(dataPoint.cummulative_ascent()) <<
+                        csvEntry(dataPoint.cummulative_descent()) << std::endl;
+        }
+
+        return 0;
+    }
+    virtual std::string syntax() const override
+    {
+        return name() + " <activity_id>";
+    }
+    virtual std::string description() const override
+    {
+        return "plot sctivity data points to CSV format";
+    }
+    virtual size_t minNumberOfArgs() const override
+    {
+        return 1;
+    }
+    virtual size_t maxNumberOfArgs() const override
+    {
+        return 1;
     }
 };
 
@@ -224,7 +332,9 @@ private:
 
     std::map<std::string, std::shared_ptr<CommandHandler> > _commands{
         { "upload", std::make_shared<UploadCommandHandler>("upload") },
-        { "list", std::make_shared<ListCommandHandler>("list") }
+        { "list", std::make_shared<ListCommandHandler>("list") },
+        { "stats", std::make_shared<StatsCommandHandler>("stats") },
+        { "plot", std::make_shared<PlotCommandHandler>("plot") }
     };
 };
 

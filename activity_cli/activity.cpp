@@ -19,7 +19,12 @@ Activity::Activity(activity_log::Activity& activity, std::shared_ptr<activity_lo
 {
 }
 
-std::string Activity::name() const
+const std::string& Activity::id() const
+{
+    return _activity.id();
+}
+
+const std::string& Activity::name() const
 {
     return _activity.name();
 }

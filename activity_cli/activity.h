@@ -13,7 +13,8 @@ class Activity
 public:
     Activity();
     Activity(activity_log::Activity& activity, std::shared_ptr<activity_log::ActivityLog::Stub> stub);
-    std::string name() const;
+    const std::string& id() const;
+    const std::string& name() const;
 
     std::chrono::system_clock::time_point startTime() const;
     std::chrono::system_clock::duration duration() const;

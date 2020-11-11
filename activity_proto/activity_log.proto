@@ -3,9 +3,10 @@ syntax = "proto3";
 package activity_log;
 
 message Stats {
-    uint32 total_time = 1;
-    float total_distance = 2;
-    float total_ascent = 3;
+    uint32 total_activities = 1;
+    uint32 total_time = 2;
+    float total_distance = 3;
+    float total_ascent = 4;
 };
 
 message Activity {
@@ -69,6 +70,7 @@ service ActivityLog
 
     rpc getActivityList(TimeSpan) returns(stream Activity) {}
     rpc calculateStats(TimeSpan) returns(Stats) {}
+    rpc getActivity(ActivityRequest) returns(Activity) {}
 
     // For generating analysis plots
     rpc plotActivity(ActivityRequest) returns(stream DataPoint) {}

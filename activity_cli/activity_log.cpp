@@ -102,3 +102,22 @@ grpc::Status ActivityLog::calculateStats(system_clock::time_point startTime, sys
 
     return _stub->calculateStats(&context, timeSpan, &stats);
 }
+
+
+grpc::Status ActivityLog::getActivity(const std::string& activityId, Activity& activity) const
+{
+    ClientContext context;
+
+    activity_log::ActivityRequest request;
+    request.set_activity_id(activityId);
+
+    activity_log::Activity restrievedActivity;
+    auto status = _stub->getActivity(&context, request, &restrievedActivity);
+
+    if (status.ok())
+    {
+        activity = Activity(restrievedActivity, _stub);
+    }
+
+    return status;
+}
