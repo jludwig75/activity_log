@@ -25,26 +25,6 @@
  
 using namespace xercesc;
 
-namespace
-{
-
-std::string readFile(const std::string& fileName)
-{
-    std::ifstream t(fileName);
-    std::string str;
-
-    t.seekg(0, std::ios::end);
-    str.reserve(t.tellg());
-    t.seekg(0, std::ios::beg);
-
-    str.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-
-    return str;
-}
-
-}
-
-
 namespace internal
 {
 
@@ -92,19 +72,17 @@ int XercesPlatform::s_ref_count{};
 } // namespace internal
 
 
-bool GpxParser::canParseFile(const std::string& fileName) const
+bool GpxParser::canParseActivityData(const std::string& activityData) const
 {
-    // TODO: make case insensitive
-    return fileName.length() >= 5 && fileName.substr(fileName.length() - 4) == ".gpx";
+    // TODO: verify that it's a GPX file
+    return true;
 }
 
-bool GpxParser::parseFile(const std::string& fileName, Container<TrackPoint> &output) const
+bool GpxParser::parseActivityData(const std::string& activityData, Container<TrackPoint> &output) const
 {
     internal::XercesPlatform platform;
 
-    auto fileData = readFile(fileName);
-
-    return internal::parseFile(fileData, output);
+    return internal::parseFile(activityData, output);
 }
 
 namespace internal
@@ -188,7 +166,8 @@ bool parseTrackPoint(DOMElement* trackPointElement, Container<TrackPoint>& strea
             altitude != std::numeric_limits<double>::infinity() &&
             time != 0);
 
-    stream.push(TrackPoint(std::chrono::system_clock::from_time_t(time), latitude, longitude, altitude, startOfSegment));
+    // TODO: parse heart reate
+    stream.push(TrackPoint(std::chrono::system_clock::from_time_t(time), latitude, longitude, altitude, 0, startOfSegment));
     return true;
 }
 

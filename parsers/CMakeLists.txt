@@ -1,6 +1,7 @@
 add_library(parser STATIC
             parser.cpp
-            gpxparser.cpp)
+            gpxparser.cpp
+            track_point.cpp)
 
 target_link_libraries(parser
                       xerces-c)

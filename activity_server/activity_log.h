@@ -6,6 +6,7 @@
 #include "activity_log.grpc.pb.h"
 
 #include "parser.h"
+#include "activity_db.h"
 
 class ActivityLog final : public activity_log::ActivityLog::Service
 {
@@ -49,5 +50,7 @@ public:
                                   grpc::ServerWriter<activity_log::ActivityFileChunk>* stream) override;
 
 private:
+    void toProto(const Activity& activity, activity_log::Activity* protoActivity) const;
     Parser _parser;
+    ActivityDatabase _db;
 };

@@ -1,10 +1,31 @@
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
 
 #include "parser.h"
+
+
+namespace
+{
+
+std::string readFile(const std::string& fileName)
+{
+    std::ifstream t(fileName);
+    std::string str;
+
+    t.seekg(0, std::ios::end);
+    str.reserve(t.tellg());
+    t.seekg(0, std::ios::beg);
+
+    str.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
+
+    return str;
+}
+
+}
 
 
 int main(int argc, char *argv[])
@@ -19,11 +40,13 @@ int main(int argc, char *argv[])
 
     Parser parser;
 
+    auto fileName = args[0];
+    auto activityData = readFile(fileName);
+
     Container<TrackPoint> output;
     int ret = 0;
-    auto fileName = args[0];
-    std::thread parserThread([&parser, &output, fileName, &ret]{
-        if (!parser.parseFile(fileName, output))
+    std::thread parserThread([&parser, &output, &activityData, &ret]{
+        if (!parser.parseActivityData(activityData, output))
         {
             ret = -1;
         }

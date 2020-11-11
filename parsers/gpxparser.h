@@ -6,6 +6,6 @@
 class GpxParser : public ActivityParser
 {
 public:
-    bool canParseFile(const std::string& fileName) const override;
-    bool parseFile(const std::string& fileName, Container<TrackPoint> &output) const override;
+    bool canParseActivityData(const std::string& activityData) const override;
+    bool parseActivityData(const std::string& activityData, Container<TrackPoint> &output) const override;
 };
