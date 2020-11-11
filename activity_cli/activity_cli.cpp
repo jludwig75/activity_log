@@ -51,7 +51,7 @@ public:
         _name(name)
     {
     }
-    ~CommandHandler() {}
+    virtual ~CommandHandler() {}
     virtual int runCommand(const std::vector<std::string>& args) = 0;
     virtual std::string syntax() const = 0;
     virtual std::string description() const = 0;
