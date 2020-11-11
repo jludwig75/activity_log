@@ -262,6 +262,54 @@ public:
     }
 };
 
+class DeleteCommandHandler : public CommandHandler
+{
+public:
+    DeleteCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args) override
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        Activity activity;
+        auto status = activityLog.getActivity(args[0], activity);
+        if (!status.ok())
+        {
+            std::cout << "Failed to find activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        if (!activity.del().ok())
+        {
+            std::cout << "Failed to delete activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        return 0;
+    }
+    virtual std::string syntax() const override
+    {
+        return name() + " <activity_id>";
+    }
+    virtual std::string description() const override
+    {
+        return "deletes and activity";
+    }
+    virtual size_t minNumberOfArgs() const override
+    {
+        return 1;
+    }
+    virtual size_t maxNumberOfArgs() const override
+    {
+        return 1;
+    }
+};
+
 class CommandRunner
 {
 public:
@@ -334,7 +382,8 @@ private:
         { "upload", std::make_shared<UploadCommandHandler>("upload") },
         { "list", std::make_shared<ListCommandHandler>("list") },
         { "stats", std::make_shared<StatsCommandHandler>("stats") },
-        { "plot", std::make_shared<PlotCommandHandler>("plot") }
+        { "plot", std::make_shared<PlotCommandHandler>("plot") },
+        { "delete", std::make_shared<DeleteCommandHandler>("delete") }
     };
 };
 

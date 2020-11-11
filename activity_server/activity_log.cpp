@@ -67,6 +67,25 @@ grpc::Status ActivityLog::calculateStats(grpc::ServerContext* context,
                             const activity_log::TimeSpan* timesSpan,
                             activity_log::Stats* stats)
 {
+    ActivityDatabase::ActivityMap activities;
+    // TODO: Add support for filtering by timespan
+    if (!_db.listActivities(activities))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity map");
+    }
+
+    stats->set_total_activities(0);
+    stats->set_total_time(0);
+    stats->set_total_distance(0);
+    stats->set_total_ascent(0);
+    for (auto& [activityId, activity]: activities)
+    {
+        stats->set_total_activities(stats->total_activities() + 1);
+        stats->set_total_time(stats->total_time() + std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count());
+        stats->set_total_distance(stats->total_distance() + activity.stats.total_distance);
+        stats->set_total_ascent(stats->total_ascent() + activity.stats.total_ascent);
+    }
+
     return Status::OK;
 }
 
@@ -75,13 +94,21 @@ grpc::Status ActivityLog::getActivity(grpc::ServerContext* context,
                             const activity_log::ActivityRequest* request,
                             activity_log::Activity* activity)
 {
+    Activity retrievedActivity;
+    if (!_db.loadActivity(request->activity_id(), retrievedActivity))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity " + request->activity_id());
+    }
+
+    toProto(retrievedActivity, activity);
+
     return Status::OK;
 }
 
 
 // For generating analysis plots
 grpc::Status ActivityLog::plotActivity(grpc::ServerContext* context,
-                            const activity_log::ActivityRequest*,
+                            const activity_log::ActivityRequest* request,
                             grpc::ServerWriter<activity_log::DataPoint>* stream)
 {
     return Status::OK;
@@ -89,7 +116,7 @@ grpc::Status ActivityLog::plotActivity(grpc::ServerContext* context,
 
 // For creating activity maps/profiles
 grpc::Status ActivityLog::getActivityTrack(grpc::ServerContext* context,
-                                const activity_log::ActivityRequest*,
+                                const activity_log::ActivityRequest* request,
                                 grpc::ServerWriter<activity_log::TrackPoint>* stream)
 {
     return Status::OK;
@@ -97,17 +124,23 @@ grpc::Status ActivityLog::getActivityTrack(grpc::ServerContext* context,
 
 
 grpc::Status ActivityLog::editActivity(grpc::ServerContext* context,
-                            const activity_log::EditActivityRequest*,
-                            activity_log::Activity*)
+                            const activity_log::EditActivityRequest* request,
+                            activity_log::Activity* activity)
 {
     return Status::OK;
 }
 
 
 grpc::Status ActivityLog::deleteActivity(grpc::ServerContext* context,
-                            const activity_log::ActivityRequest*,
+                            const activity_log::ActivityRequest* request,
                             activity_log::Empty* )
 {
+    Activity retrievedActivity;
+    if (!_db.deleteActivity(request->activity_id()))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error deleting activity " + request->activity_id());
+    }
+
     return Status::OK;
 }
 
