@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package activity_log;
+
+message Stats {
+    uint32 total_time = 1;
+    float total_distance = 2;
+    float total_ascent = 3;
+};
+
+message Activity {
+    string id = 1;
+    string name = 2;
+    uint64 start_time = 3;
+    uint64 duration = 4;
+    float total_distance = 5;
+    float total_ascent = 6;
+    float total_descent = 7;
+    float max_speed = 8;
+    uint32 average_heart_rate = 9;
+    uint32 max_heart_rate = 10;
+    uint32 average_climbing_grade = 11;
+    uint32 average_descending_grade = 12;
+};
+
+message ActivityFileChunk {
+    bytes data = 1;
+};
+
+message TimeSpan {
+    uint64 start_time = 1;
+    uint64 end_time = 2;
+};
+
+message ActivityRequest {
+    string activity_id = 1;
+};
+
+message EditActivityRequest {
+    string activity_id = 1;
+    string name = 2;
+};
+
+message DataPoint {
+    uint64 time = 1;
+    float altitude = 2;
+    float cummulative_distance = 3;
+    float speed = 4;
+    float grade = 5;
+    uint32 heart_rate = 6;
+    float cummulative_ascent = 7;
+    float cummulative_descent = 8;
+};
+
+message TrackPoint {
+    uint64 time = 1;
+    double latitude = 2;
+    double longitude = 3;
+    float altitude = 4;
+    bool start_of_sgement = 5;
+    bool end_of_segment = 6;
+};
+
+message Empty {
+};
+
+service ActivityLog
+{
+    rpc uploadActivity(stream ActivityFileChunk) returns(Activity) {}
+
+    rpc getActivityList(TimeSpan) returns(stream Activity) {}
+    rpc calculateStats(TimeSpan) returns(Stats) {}
+
+    // For generating analysis plots
+    rpc plotActivity(ActivityRequest) returns(stream DataPoint) {}
+    // For creating activity maps/profiles
+    rpc getActivityTrack(ActivityRequest) returns(stream TrackPoint) {}
+    rpc editActivity(EditActivityRequest) returns(Activity) {}
+    rpc deleteActivity(ActivityRequest) returns(Empty) {}
+    rpc downloadActivity(ActivityRequest) returns(stream ActivityFileChunk) {}
+};
