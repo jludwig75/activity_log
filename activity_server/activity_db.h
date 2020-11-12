@@ -6,12 +6,19 @@
 
 #include "activity.h"
 
+#include <mongocxx/client.hpp>
+
 class Activity;
 
+// namespace mongocxx
+// {
+// class client;
+// }
 
 class ActivityDatabase
 {
 public:
+    ActivityDatabase();
     // Create
     bool storeActivity(const Activity& activity, std::string& activityId);
 
@@ -28,4 +35,5 @@ public:
 
 private:
     std::map<std::string, Activity> _activities;
+    std::unique_ptr<mongocxx::client> _client;
 };

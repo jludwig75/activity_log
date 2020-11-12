@@ -8,6 +8,8 @@ project(activity_log VERSION 1.0)
 
 find_package(Threads REQUIRED)
 find_package(Catch2 REQUIRED)
+find_package(libmongocxx REQUIRED)
+#find_package(mongocxx REQUIRED)
 
 include(CTest)
 include(Catch)
