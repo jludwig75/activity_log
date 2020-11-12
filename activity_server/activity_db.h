@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <map>
 
 #include "activity.h"
@@ -34,6 +33,5 @@ public:
     bool deleteActivity(const std::string& activityId);
 
 private:
-    std::map<std::string, Activity> _activities;
     std::unique_ptr<mongocxx::client> _client;
 };

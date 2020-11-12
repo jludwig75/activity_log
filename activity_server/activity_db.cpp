@@ -1,6 +1,5 @@
 #include "activity_db.h"
 
-
 #include <iostream>
 #include <ctime>
 #include <unistd.h>
@@ -9,6 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <bsoncxx/json.hpp>
+#include <bsoncxx/stdx/string_view.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/stdx.hpp>
 #include <mongocxx/uri.hpp>
@@ -56,15 +56,37 @@ ActivityDatabase::ActivityDatabase()
     mongocxx::client client{mongocxx::uri{}};
 }
 
-bool ActivityDatabase::storeActivity(const Activity& activity, std::string& activityId)
+bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activity)
 {
-    activityId = gen_random(32);
+    auto id = activityView["_id"].get_oid().value.to_string();;
+    auto name = activityView["name"].get_utf8().value.to_string();;
 
-    mongocxx::database db = (*_client)["activity_log"];
-    mongocxx::collection collection = db["activities"];
+    activity.id = id;
+    activity.name = name;
+
+    auto trackPoints = activityView["trackPoints"].get_array().value;
+    for (const auto& trackPointElement : trackPoints)
+    {
+        TrackPoint trackPoint;
+        bsoncxx::document::view trackPointView = trackPointElement.get_document().value;
+        trackPoint.time = std::chrono::system_clock::from_time_t(trackPointView["time"].get_int64().value);
+        trackPoint.latitude = trackPointView["latitude"].get_double().value;
+        trackPoint.longitude = trackPointView["longitude"].get_double().value;
+        trackPoint.altitude = trackPointView["altitude"].get_double().value;
+        trackPoint.heartRate = trackPointView["heartRate"].get_int32().value;
+        activity.trackPoints.push(trackPoint);
+    }
+
+    activity.analyzeTrackPoints();
+
+    return true;
+}
+
+bsoncxx::document::value serializeActivity(const Activity& activity)
+{
     auto builder = bsoncxx::builder::stream::document{};
 
-    auto inArray = builder << "id" << activityId << "name" << activity.name << "trackPoints" << bsoncxx::builder::stream::open_array;
+    auto inArray = builder << "name" << activity.name << "trackPoints" << bsoncxx::builder::stream::open_array;
 
     for (const auto& trackPoint : activity.trackPoints)
     {
@@ -78,11 +100,20 @@ bool ActivityDatabase::storeActivity(const Activity& activity, std::string& acti
     }
 
     auto afterArray = inArray << close_array;
-    bsoncxx::document::value doc_value = afterArray << bsoncxx::builder::stream::finalize;
+    return afterArray << bsoncxx::builder::stream::finalize;
+}
 
-    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = collection.insert_one(std::move(doc_value));
+bool ActivityDatabase::storeActivity(const Activity& activity, std::string& activityId)
+{
+    //activityId = gen_random(32);
 
-    _activities[activityId] = activity;
+    mongocxx::database db = (*_client)["activity_log"];
+    mongocxx::collection collection = db["activities"];
+
+    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = collection.insert_one(serializeActivity(activity));
+
+    activityId = result->inserted_id().get_oid().value.to_string();
+
     return true;
 }
 
@@ -91,49 +122,67 @@ bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& act
     mongocxx::database db = (*_client)["activity_log"];
     mongocxx::collection collection = db["activities"];
 
-    bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result =
-    collection.find_one(document{} << "id" << activityId << finalize);
-    if(maybe_result) {
-        std::cout << bsoncxx::to_json(*maybe_result) << "\n";
-    }
-
-    auto entry = _activities.find(activityId);
-    if (entry == _activities.end())
+    bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(document{} 
+        << "_id"
+        << bsoncxx::oid{mongocxx::stdx::string_view{activityId}}
+        << bsoncxx::builder::stream::finalize);
+    if(maybe_result)
     {
-        return false;
+        auto view = maybe_result->view();
+        if (!desrializeActivity(view, activity))
+        {
+            return false;
+        }
+        return true;
     }
 
-    activity = entry->second;
-    return true;
+    return false;
 }
 
 bool ActivityDatabase::listActivities(ActivityMap& activities) const
 {
-    activities = _activities;
+    mongocxx::database db = (*_client)["activity_log"];
+    
+    auto cursor = db["activities"].find({});
+    std::vector<bsoncxx::document::view> activitiesView{cursor.begin(), cursor.end()};
+    for (std::size_t i = 0; i < activitiesView.size(); ++i)
+    {
+        bsoncxx::document::view activityView = activitiesView[i];
+        Activity activity;
+        if (!desrializeActivity(activityView, activity))
+        {
+            return false;
+        }
+        activities[activity.id] = activity;
+    }
 
     return true;
 }
 
 bool ActivityDatabase::updateActivity(const std::string& activityId, const Activity& activity)
 {
-    auto entry = _activities.find(activityId);
-    if (entry == _activities.end())
-    {
-        return false;
-    }
+    mongocxx::database db = (*_client)["activity_log"];
 
-    _activities[activityId] = activity;
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::document::value idDoc = builder << "_id"
+                        << bsoncxx::oid{mongocxx::stdx::string_view{activityId}}
+                        << bsoncxx::builder::stream::finalize;
+    db["activities"].replace_one(
+        std::move(idDoc),
+        serializeActivity(activity));
+
     return true;
 }
 
 bool ActivityDatabase::deleteActivity(const std::string& activityId)
 {
-    auto entry = _activities.find(activityId);
-    if (entry == _activities.end())
-    {
-        return false;
-    }
+    mongocxx::database db = (*_client)["activity_log"];
 
-    _activities.erase(entry);
+    auto builder = bsoncxx::builder::stream::document{};
+    bsoncxx::document::value idDoc = builder << "_id"
+                        << bsoncxx::oid{mongocxx::stdx::string_view{activityId}}
+                        << bsoncxx::builder::stream::finalize;
+    db["activities"].delete_one(std::move(idDoc));
+
     return true;
 }

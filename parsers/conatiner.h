@@ -18,19 +18,19 @@ public:
     Container(const Container& other)
         :
         _deque(other._deque),
-        _done_pushing(true)
+        _done_pushing(other._done_pushing)
     {
         // TODO: Not sure if it makse sense to always assert this.
         // Might be too obscure, but it could be a bug.
-        assert(other._done_pushing);
+        //assert(other._done_pushing);
     }
     Container& operator=(const Container& other)
     {
         // TODO: Not sure if it makse sense to always assert this.
         // Might be too obscure, but it could be a bug.
-        assert(other._done_pushing);
+        //assert(other._done_pushing);
         _deque = other._deque;
-        _done_pushing = true;   // Can't handle this, because there will be no writer.
+        _done_pushing = other._done_pushing;   // Can't handle this, because there will be no writer.
         return *this;
     }
 
