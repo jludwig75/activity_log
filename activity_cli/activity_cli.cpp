@@ -248,6 +248,66 @@ public:
     }
 };
 
+class TrackCommandHandler : public CommandHandler
+{
+public:
+    TrackCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args) override
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        Activity activity;
+        auto status = activityLog.getActivity(args[0], activity);
+        if (!status.ok())
+        {
+            std::cout << "Failed to find activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        std::vector<activity_log::TrackPoint> trackPoints;
+        status = activity.getTracks(trackPoints);
+        if (!status.ok())
+        {
+            std::cout << "Failed to get track points for activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        std::cout << "time,latitude,longitude,altitude,start_of_sgement\n";
+        for (const auto& trackPoint : trackPoints)
+        {
+            std::cout << trackPoint.time() <<
+                        csvEntry(trackPoint.latitude()) <<
+                        csvEntry(trackPoint.longitude()) <<
+                        csvEntry(trackPoint.altitude()) <<
+                        csvEntry(trackPoint.start_of_sgement()) << std::endl;
+        }
+
+        return 0;
+    }
+    virtual std::string syntax() const override
+    {
+        return name() + " <activity_id>";
+    }
+    virtual std::string description() const override
+    {
+        return "retreive activity track points in CSV format";
+    }
+    virtual size_t minNumberOfArgs() const override
+    {
+        return 1;
+    }
+    virtual size_t maxNumberOfArgs() const override
+    {
+        return 1;
+    }
+};
+
 class PlotCommandHandler : public CommandHandler
 {
 public:
@@ -491,6 +551,7 @@ private:
         { "get", std::make_shared<GetCommandHandler>("get") },
         { "stats", std::make_shared<StatsCommandHandler>("stats") },
         { "plot", std::make_shared<PlotCommandHandler>("plot") },
+        { "track", std::make_shared<TrackCommandHandler>("track") },
         { "edit", std::make_shared<EditCommandHandler>("edit") },
         { "delete", std::make_shared<DeleteCommandHandler>("delete") }
     };
