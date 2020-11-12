@@ -27,5 +27,5 @@ double greatCircleDistance(const TrackPoint& pos1, const TrackPoint& pos2)
 
 Displacement operator-(const TrackPoint& a, const TrackPoint &b)
 {
-    return Displacement(greatCircleDistance(a, b), a.altitude - b.altitude);
+    return Displacement(a.time - b.time, greatCircleDistance(a, b), a.altitude - b.altitude);
 }

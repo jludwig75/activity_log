@@ -112,7 +112,58 @@ grpc::Status ActivityLog::plotActivity(grpc::ServerContext* context,
                             const activity_log::ActivityRequest* request,
                             grpc::ServerWriter<activity_log::DataPoint>* stream)
 {
-    // TODO
+    Activity activity;
+    if (!_db.loadActivity(request->activity_id(), activity))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity " + request->activity_id());
+    }
+
+    TrackPoint previousPoint;
+    double cummulativeDistance = 0;
+    float cummulativeAscent = 0;
+    float cummulativeDescent = 0;
+    auto startTime = std::chrono::system_clock::from_time_t(0);
+    for (const auto& trackPoint : activity.trackPoints)
+    {
+        if (startTime == std::chrono::system_clock::from_time_t(0))
+        {
+            startTime = trackPoint.time;
+        }
+        else
+        {
+            assert(trackPoint.time >= previousPoint.time);
+            auto displacement = trackPoint - previousPoint;
+
+            cummulativeDistance += displacement.hDistance;
+
+            if (displacement.vDistance > 0)
+            {
+                cummulativeAscent += displacement.vDistance;
+            }
+            else if (displacement.vDistance < 0)
+            {
+                cummulativeDescent += -displacement.vDistance;
+            }
+
+            activity_log::DataPoint dataPoint;
+            dataPoint.set_time(std::chrono::duration_cast<std::chrono::seconds>(trackPoint.time - startTime).count());
+            dataPoint.set_altitude(trackPoint.altitude);
+            dataPoint.set_cummulative_distance(cummulativeDistance);
+            dataPoint.set_speed(displacement.speed());
+            dataPoint.set_grade(displacement.grade());
+            dataPoint.set_heart_rate(trackPoint.heartRate);
+            dataPoint.set_cummulative_ascent(cummulativeAscent);
+            dataPoint.set_cummulative_descent(cummulativeDescent);
+
+            if (!stream->Write(dataPoint))
+            {
+                return grpc::Status(grpc::StatusCode::UNKNOWN, "Error writing data point to stream");
+            }
+        }
+
+        previousPoint = trackPoint;
+    }
+
     return Status::OK;
 }
 
@@ -121,7 +172,28 @@ grpc::Status ActivityLog::getActivityTrack(grpc::ServerContext* context,
                                 const activity_log::ActivityRequest* request,
                                 grpc::ServerWriter<activity_log::TrackPoint>* stream)
 {
-    // TODO
+    Activity activity;
+    if (!_db.loadActivity(request->activity_id(), activity))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity " + request->activity_id());
+    }
+
+    for (const auto& trackPoint : activity.trackPoints)
+    {
+        activity_log::TrackPoint tp;
+
+        tp.set_time(std::chrono::system_clock::to_time_t(trackPoint.time));
+        tp.set_latitude(trackPoint.latitude);
+        tp.set_longitude(trackPoint.longitude);
+        tp.set_altitude(trackPoint.altitude);
+        tp.set_start_of_sgement(trackPoint.startOfSegement);
+
+        if (!stream->Write(tp))
+        {
+            return grpc::Status(grpc::StatusCode::UNKNOWN, "Error writing activity to stream");
+        }
+    }
+
     return Status::OK;
 }
 
@@ -158,7 +230,6 @@ grpc::Status ActivityLog::deleteActivity(grpc::ServerContext* context,
                             const activity_log::ActivityRequest* request,
                             activity_log::Empty* )
 {
-    Activity retrievedActivity;
     if (!_db.deleteActivity(request->activity_id()))
     {
         return grpc::Status(grpc::StatusCode::UNKNOWN, "Error deleting activity " + request->activity_id());

@@ -31,7 +31,7 @@ void Activity::analyzeTrackPoints()
             intervalCount++;
             assert(trackPoint.time >= previous.time);
             auto displacement = trackPoint - previous;
-            auto duration = trackPoint.time - previous.time;
+            auto duration = displacement.duration;
             
             // distance
             stats.total_distance += displacement.hDistance;
@@ -44,8 +44,7 @@ void Activity::analyzeTrackPoints()
                 // average climbing grade
                 if (displacement.hDistance > 0)
                 {
-                    auto grade = displacement.vDistance / displacement.hDistance;
-                    stats.average_climbing_grade = (stats.average_climbing_grade * (intervalCount - 1) + grade) / intervalCount;
+                    stats.average_climbing_grade = (stats.average_climbing_grade * (intervalCount - 1) + displacement.grade()) / intervalCount;
                 }
             }
             else if (displacement.vDistance < 0)
@@ -56,21 +55,15 @@ void Activity::analyzeTrackPoints()
                 // average descending grade
                 if (displacement.hDistance > 0)
                 {
-                    auto grade = displacement.vDistance / displacement.hDistance;
-                    stats.average_descending_grade = (stats.average_descending_grade * (intervalCount - 1) + grade) / intervalCount;
+                    stats.average_descending_grade = (stats.average_descending_grade * (intervalCount - 1) + displacement.grade()) / intervalCount;
                 }
             }
 
             // max speed
-            if (duration.count() > 0)
+            auto speed = displacement.speed();
+            if (speed > stats.max_speed)
             {
-                // TODO: Are frational seconds possible in the file formats?
-                auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-                auto speed = displacement.hDistance / seconds;
-                if (speed > stats.max_speed)
-                {
-                    stats.max_speed = speed;
-                }
+                stats.max_speed = speed;
             }
 
             // average heart rate
