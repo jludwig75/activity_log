@@ -1,12 +1,5 @@
 #include "activity_db.h"
 
-#include <iostream>
-#include <ctime>
-#include <unistd.h>
-
-#include <cstdint>
-#include <iostream>
-#include <vector>
 #include <bsoncxx/json.hpp>
 #include <bsoncxx/stdx/string_view.hpp>
 #include <mongocxx/client.hpp>
@@ -28,33 +21,6 @@ using namespace std;
 
 namespace
 {
-
-string gen_random(const int len) {
-    
-    string tmp_s;
-    static const char alphanum[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-    
-    srand( (unsigned) time(NULL) * getpid());
-    
-    for (int i = 0; i < len; ++i) 
-        tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
-    
-    
-    return tmp_s;
-    
-}
-
-}
-
-ActivityDatabase::ActivityDatabase()
-{
-    mongocxx::instance instance{}; // This should be done only once.
-    _client = std::make_unique<mongocxx::client>(mongocxx::uri{});
-    mongocxx::client client{mongocxx::uri{}};
-}
 
 bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activity)
 {
@@ -103,14 +69,33 @@ bsoncxx::document::value serializeActivity(const Activity& activity)
     return afterArray << bsoncxx::builder::stream::finalize;
 }
 
+bsoncxx::document::value makeActivityId(const std::string& activityId)
+{
+    auto builder = bsoncxx::builder::stream::document{};
+    return builder << "_id"
+                        << bsoncxx::oid{mongocxx::stdx::string_view{activityId}}
+                        << bsoncxx::builder::stream::finalize;
+}
+
+
+}
+
+ActivityDatabase::ActivityDatabase()
+{
+    mongocxx::instance instance{}; // This should be done only once.
+    _client = std::make_unique<mongocxx::client>(mongocxx::uri{});
+    mongocxx::client client{mongocxx::uri{}};
+}
+
 bool ActivityDatabase::storeActivity(const Activity& activity, std::string& activityId)
 {
-    //activityId = gen_random(32);
-
     mongocxx::database db = (*_client)["activity_log"];
-    mongocxx::collection collection = db["activities"];
 
-    bsoncxx::stdx::optional<mongocxx::result::insert_one> result = collection.insert_one(serializeActivity(activity));
+    auto result = db["activities"].insert_one(serializeActivity(activity));
+    if (!result)
+    {
+        return false;
+    }
 
     activityId = result->inserted_id().get_oid().value.to_string();
 
@@ -120,23 +105,20 @@ bool ActivityDatabase::storeActivity(const Activity& activity, std::string& acti
 bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& activity) const
 {
     mongocxx::database db = (*_client)["activity_log"];
-    mongocxx::collection collection = db["activities"];
 
-    bsoncxx::stdx::optional<bsoncxx::document::value> maybe_result = collection.find_one(document{} 
-        << "_id"
-        << bsoncxx::oid{mongocxx::stdx::string_view{activityId}}
-        << bsoncxx::builder::stream::finalize);
-    if(maybe_result)
+    auto result = db["activities"].find_one(makeActivityId(activityId));
+    if(!result)
     {
-        auto view = maybe_result->view();
-        if (!desrializeActivity(view, activity))
-        {
-            return false;
-        }
-        return true;
+        return false;
     }
 
-    return false;
+    auto view = result->view();
+    if (!desrializeActivity(view, activity))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 bool ActivityDatabase::listActivities(ActivityMap& activities) const
@@ -147,7 +129,7 @@ bool ActivityDatabase::listActivities(ActivityMap& activities) const
     std::vector<bsoncxx::document::view> activitiesView{cursor.begin(), cursor.end()};
     for (std::size_t i = 0; i < activitiesView.size(); ++i)
     {
-        bsoncxx::document::view activityView = activitiesView[i];
+        auto activityView = activitiesView[i];
         Activity activity;
         if (!desrializeActivity(activityView, activity))
         {
@@ -163,13 +145,7 @@ bool ActivityDatabase::updateActivity(const std::string& activityId, const Activ
 {
     mongocxx::database db = (*_client)["activity_log"];
 
-    auto builder = bsoncxx::builder::stream::document{};
-    bsoncxx::document::value idDoc = builder << "_id"
-                        << bsoncxx::oid{mongocxx::stdx::string_view{activityId}}
-                        << bsoncxx::builder::stream::finalize;
-    db["activities"].replace_one(
-        std::move(idDoc),
-        serializeActivity(activity));
+    db["activities"].replace_one(makeActivityId(activityId), serializeActivity(activity));
 
     return true;
 }
@@ -178,11 +154,7 @@ bool ActivityDatabase::deleteActivity(const std::string& activityId)
 {
     mongocxx::database db = (*_client)["activity_log"];
 
-    auto builder = bsoncxx::builder::stream::document{};
-    bsoncxx::document::value idDoc = builder << "_id"
-                        << bsoncxx::oid{mongocxx::stdx::string_view{activityId}}
-                        << bsoncxx::builder::stream::finalize;
-    db["activities"].delete_one(std::move(idDoc));
+    db["activities"].delete_one(makeActivityId(activityId));
 
     return true;
 }
