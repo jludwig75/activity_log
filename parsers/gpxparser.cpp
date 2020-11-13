@@ -1,5 +1,7 @@
 #include "gpxparser.h"
 
+#include "file_utils.h"
+
 #include <cassert>
 #include <fstream>
 #include <iomanip>
@@ -74,6 +76,11 @@ int XercesPlatform::s_ref_count{};
 
 bool GpxParser::canParseActivityData(const std::string& activityData) const
 {
+    if (!apperasToBeXmlFileData(activityData))
+    {
+        return false;
+    }
+
     // TODO: verify that it's a GPX file
     return true;
 }

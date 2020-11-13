@@ -7,3 +7,11 @@ add_executable(parse_activity
 target_link_libraries(parse_activity
                       parser
                       pthread)
+
+
+add_executable(file_utils_test
+                file_utils_test.cpp
+                ../file_utils.cpp)
+
+target_link_libraries(file_utils_test
+                        catch2_main)
