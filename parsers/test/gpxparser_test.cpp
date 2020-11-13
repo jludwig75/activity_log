@@ -51,6 +51,8 @@ TEST_CASE( "gpxparser", "" ) {
 
         REQUIRE(output.size() == 5);
 
+        REQUIRE(output[0].activityName == "Fun Long View, Three Falls, Forbidden Loop");
+
         REQUIRE(output[0].latitude == Approx(40.4645690));
         REQUIRE(output[0].longitude == Approx(-111.8047420));
         REQUIRE(output[0].altitude == Approx(1591.6));
@@ -60,21 +62,25 @@ TEST_CASE( "gpxparser", "" ) {
         REQUIRE(output[1].longitude == Approx(-111.8049490));
         REQUIRE(output[1].altitude == Approx(1592.6));
         REQUIRE(!output[1].startOfSegement);
+        REQUIRE(output[1].activityName.empty());
 
         REQUIRE(output[2].latitude == Approx(40.4648990));
         REQUIRE(output[2].longitude == Approx(-111.8049670));
         REQUIRE(output[2].altitude == Approx(1592.7));
         REQUIRE(!output[2].startOfSegement);
+        REQUIRE(output[2].activityName.empty());
 
         REQUIRE(output[3].latitude == Approx(40.4650730));
         REQUIRE(output[3].longitude == Approx(-111.8048700));
         REQUIRE(output[3].altitude == Approx(1591.4));
         REQUIRE(output[3].startOfSegement);
+        REQUIRE(output[3].activityName.empty());
 
         REQUIRE(output[4].latitude == Approx(40.4652790));
         REQUIRE(output[4].longitude == Approx(-111.8047500));
         REQUIRE(output[4].altitude == Approx(1590.5));
         REQUIRE(!output[4].startOfSegement);
+        REQUIRE(output[4].activityName.empty());
     }
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <chrono>
-#include <cmath>
+#include <string>
 
 
 class TrackPoint
@@ -29,6 +29,7 @@ public:
     float altitude;
     unsigned heartRate;
     bool startOfSegement;
+    std::string activityName;
 };
 
 

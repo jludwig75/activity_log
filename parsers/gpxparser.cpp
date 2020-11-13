@@ -115,7 +115,7 @@ std::time_t parseTimeString(const std::string& timeStr)
 }
 
 
-bool parseTrackPoint(DOMElement* trackPointElement, Container<TrackPoint>& stream, bool startOfSegment)
+bool parseTrackPoint(DOMElement* trackPointElement, Container<TrackPoint>& stream, bool startOfSegment, const std::string& activityName, bool& activityNameSet)
 {
     double latitude = std::numeric_limits<double>::infinity();
     double longitude = std::numeric_limits<double>::infinity();
@@ -174,11 +174,17 @@ bool parseTrackPoint(DOMElement* trackPointElement, Container<TrackPoint>& strea
             time != 0);
 
     // TODO: parse heart reate
-    stream.push(TrackPoint(std::chrono::system_clock::from_time_t(time), latitude, longitude, altitude, 0, startOfSegment));
+    auto trackPoint = TrackPoint(std::chrono::system_clock::from_time_t(time), latitude, longitude, altitude, 0, startOfSegment);
+    if (!activityNameSet && !activityName.empty())
+    {
+        trackPoint.activityName = activityName;
+        activityNameSet = true;
+    }
+    stream.push(std::move(trackPoint));
     return true;
 }
 
-bool parseTrackSegment(DOMElement* trackSegmentElement, Container<TrackPoint>& stream)
+bool parseTrackSegment(DOMElement* trackSegmentElement, Container<TrackPoint>& stream, const std::string& activityName, bool& activityNameSet)
 {
     auto TAG_trackPt = XMLString::transcode("trkpt");
 
@@ -196,7 +202,7 @@ bool parseTrackSegment(DOMElement* trackSegmentElement, Container<TrackPoint>& s
                         = dynamic_cast< xercesc::DOMElement* >( trackSegmentChildNode );
             if( XMLString::equals(trackSegmentChildElement->getTagName(), TAG_trackPt))
             {
-                if (!parseTrackPoint(trackSegmentChildElement, stream, startOfSegment))
+                if (!parseTrackPoint(trackSegmentChildElement, stream, startOfSegment, activityName, activityNameSet))
                 {
                     return false;
                 }
@@ -208,13 +214,12 @@ bool parseTrackSegment(DOMElement* trackSegmentElement, Container<TrackPoint>& s
     return true;
 }
 
-bool parseTrack(DOMElement* trackElement, Container<TrackPoint>& stream)
+bool parseTrack(DOMElement* trackElement, Container<TrackPoint>& stream, std::string& activityName, bool& activityNameSet)
 {
     auto TAG_trackSeg = XMLString::transcode("trkseg");
     auto TAG_name = XMLString::transcode("name");
     auto TAG_type = XMLString::transcode("type");
 
-    std::string trackName = "";
     unsigned trackType = UINT_MAX;
 
     DOMNodeList* trackChildren = trackElement->getChildNodes();
@@ -230,7 +235,7 @@ bool parseTrack(DOMElement* trackElement, Container<TrackPoint>& stream)
                         = dynamic_cast< xercesc::DOMElement* >( trackChildNode );
             if( XMLString::equals(trackChildElement->getTagName(), TAG_trackSeg))
             {
-                if (!parseTrackSegment(trackChildElement, stream))
+                if (!parseTrackSegment(trackChildElement, stream, activityName, activityNameSet))
                 {
                     return false;
                 }
@@ -238,7 +243,11 @@ bool parseTrack(DOMElement* trackElement, Container<TrackPoint>& stream)
             else if( XMLString::equals(trackChildElement->getTagName(), TAG_name))
             {
                 DOMNode *node = trackChildElement->getFirstChild();
-                trackName = XMLString::transcode(node->getNodeValue());
+                if (!activityNameSet)
+                {
+                    assert(activityName.empty());
+                    activityName = XMLString::transcode(node->getNodeValue());
+                }
             }
             else if( XMLString::equals(trackChildElement->getTagName(), TAG_type))
             {
@@ -274,6 +283,9 @@ bool parseFile(const std::string& gpxFileData, Container<TrackPoint>& stream)
     DOMNodeList* children = elementRoot->getChildNodes();
     const  XMLSize_t nodeCount = children->getLength();
 
+    std::string activityName;
+    bool activityNameSet = false;
+
     // For all nodes, children of "root" in the XML tree.
     for( XMLSize_t xx = 0; xx < nodeCount; ++xx )
     {
@@ -286,7 +298,7 @@ bool parseFile(const std::string& gpxFileData, Container<TrackPoint>& stream)
                         = dynamic_cast< xercesc::DOMElement* >( currentNode );
             if( XMLString::equals(currentElement->getTagName(), TAG_track))
             {
-                if (!parseTrack(currentElement, stream))
+                if (!parseTrack(currentElement, stream, activityName, activityNameSet))
                 {
                     // TODO: Use RAII
                     stream.done_pushing();
