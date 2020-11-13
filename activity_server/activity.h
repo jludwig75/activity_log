@@ -23,7 +23,8 @@ public:
     std::chrono::system_clock::duration duration() const;
 
     std::string id;
-    std::string name;
+    std::string name() const;
+    void set_name(const std::string& name) const;
     Container<TrackPoint> trackPoints;
     struct ActivityStats
     {
@@ -36,4 +37,7 @@ public:
         double average_climbing_grade;
         double average_descending_grade;
     } stats{};
+
+private:
+    mutable std::string _name;
 };

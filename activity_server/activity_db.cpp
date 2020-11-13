@@ -28,7 +28,7 @@ bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activit
     auto name = activityView["name"].get_utf8().value.to_string();;
 
     activity.id = id;
-    activity.name = name;
+    activity.set_name(name);
 
     auto trackPoints = activityView["trackPoints"].get_array().value;
     for (const auto& trackPointElement : trackPoints)
@@ -52,7 +52,7 @@ bsoncxx::document::value serializeActivity(const Activity& activity)
 {
     auto builder = bsoncxx::builder::stream::document{};
 
-    auto inArray = builder << "name" << activity.name << "trackPoints" << bsoncxx::builder::stream::open_array;
+    auto inArray = builder << "name" << activity.name() << "trackPoints" << bsoncxx::builder::stream::open_array;
 
     for (const auto& trackPoint : activity.trackPoints)
     {

@@ -18,6 +18,26 @@ std::chrono::system_clock::duration Activity::duration() const
     return trackPoints.back().time - trackPoints.front().time;
 }
 
+std::string Activity::name() const
+{
+    if (!_name.empty() || trackPoints.empty())
+    {
+        return _name;
+    }
+
+    if (!trackPoints[0].activityName.empty())
+    {
+        _name = trackPoints[0].activityName;
+        const_cast<Activity*>(this)->trackPoints[0].activityName = "";
+    }
+    return _name;
+}
+
+void Activity::set_name(const std::string& name) const
+{
+    _name = name;
+}
+
 
 void Activity::analyzeTrackPoints()
 {
