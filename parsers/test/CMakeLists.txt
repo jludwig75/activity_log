@@ -15,3 +15,12 @@ add_executable(file_utils_test
 
 target_link_libraries(file_utils_test
                         catch2_main)
+
+
+add_executable(gpxparser_test
+                gpxparser_test.cpp
+                ../gpxparser.cpp)
+
+target_link_libraries(gpxparser_test
+                        catch2_main
+                        parser)

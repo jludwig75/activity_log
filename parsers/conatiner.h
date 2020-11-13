@@ -129,6 +129,26 @@ public:
         return _deque.back();
     }
 
+    DataType& operator[](size_t i)
+    {
+        return _deque[i];
+    }
+
+    const DataType& operator[](size_t i) const
+    {
+        return _deque[i];
+    }
+
+    DataType& at(size_t i)
+    {
+        return _deque.at(i);
+    }
+
+    const DataType& at(size_t i) const
+    {
+        return _deque.at(i);
+    }
+
 private:
     std::deque<DataType> _deque{};
     mutable std::mutex _lock{};
