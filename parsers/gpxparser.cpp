@@ -1,13 +1,6 @@
 #include "gpxparser.h"
 
-#include "scopeguard.h"
-#include "stringutils.h"
 #include "file_utils.h"
-
-#include <cassert>
-#include <iomanip>
-#include <sstream>
-
 #include "gpxfile.h"
  
 bool GpxParser::canParseActivityData(const std::string& activityData) const
