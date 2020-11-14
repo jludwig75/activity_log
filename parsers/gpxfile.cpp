@@ -14,7 +14,7 @@ namespace gpxfile
 namespace internal
 {
 
-    const char* kGpxTimeFomratString = "%Y-%m-%dT%H:%M:%SZ";
+const char* kGpxTimeFomratString = "%Y-%m-%dT%H:%M:%SZ";
 
 bool fromTimeString(const std::string& timeStr, std::time_t& time)
 {
@@ -230,6 +230,5 @@ bool generateFileData(const Container<TrackPoint>& stream, std::string& fileData
 
     return true;
 }
-
 
 } // namespace gpxfile
