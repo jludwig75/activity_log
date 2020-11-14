@@ -25,6 +25,10 @@ message Activity {
 };
 
 message ActivityFileChunk {
+    enum Limits {
+        DEFAULT_ENUM = 0;
+        MAX_CHUNK_SIZE = 65536;
+    }
     bytes data = 1;
 };
 

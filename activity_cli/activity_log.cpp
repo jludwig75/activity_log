@@ -7,9 +7,6 @@
 #include <grpcpp/client_context.h>
 
 
-const size_t  kMaxDataChunkSize = 64 * 1024;
-
-
 using grpc::ClientContext;
 using grpc::ClientWriter;
 using grpc::ClientReader;
@@ -29,7 +26,7 @@ grpc::Status ActivityLog::uploadActivity(const std::string& activityFileName, Ac
     Container<threadfile::FileChunk> fileChunks;
     bool readerSuccess = false;
     std::thread reader([activityFileName, &fileChunks, &readerSuccess]{
-        readerSuccess = threadfile::readFile(activityFileName, kMaxDataChunkSize, fileChunks);
+        readerSuccess = threadfile::readFile(activityFileName, activity_log::ActivityFileChunk::Limits::ActivityFileChunk_Limits_MAX_CHUNK_SIZE, fileChunks);
     });
 
     activity_log::Activity activity;

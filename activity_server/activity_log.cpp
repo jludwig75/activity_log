@@ -6,10 +6,6 @@
 #include "gpxfile.h"
 
 
-// TODO: Can this go into the proto file?
-#define MAX_DATA_CHUNCK_SIZE    (64 * 1024)
-
-
 using grpc::Status;
 
 
@@ -269,7 +265,7 @@ grpc::Status ActivityLog::downloadActivity(grpc::ServerContext* context,
     while (offset < gpxFileData.length())
     {
         activity_log::ActivityFileChunk chunk;
-        std::string chunkData = gpxFileData.substr(offset, MAX_DATA_CHUNCK_SIZE);
+        std::string chunkData = gpxFileData.substr(offset, activity_log::ActivityFileChunk::Limits::ActivityFileChunk_Limits_MAX_CHUNK_SIZE);
         offset += chunkData.length();
         chunk.set_data(chunkData);
         if (!stream->Write(std::move(chunk)))
