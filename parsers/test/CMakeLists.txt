@@ -40,3 +40,14 @@ target_link_libraries(gpxparser_test
                         parser)
 
 catch_discover_tests(gpxparser_test)
+
+
+### gpxfile test
+add_executable(gpxfile_test
+                gpxfile_test.cpp)
+
+target_link_libraries(gpxfile_test
+                        catch2_main
+                        parser)
+
+catch_discover_tests(gpxfile_test)

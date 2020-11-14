@@ -44,6 +44,10 @@ void Activity::analyzeTrackPoints()
     stats = {};
     TrackPoint previous;
     unsigned intervalCount = 0;
+    if (!_name.empty())
+    {
+        trackPoints.front().activityName = _name;
+    }
     for (const auto& trackPoint : trackPoints)
     {
         if (trackPoint.time > trackPoints.front().time)

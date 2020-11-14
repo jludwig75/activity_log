@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "threadfile.h"
+
 using grpc::ClientContext;
 using grpc::Status;
 
@@ -168,15 +170,22 @@ grpc::Status Activity::downloadToGpx(const std::string& gpxFileName) const
 
     std::unique_ptr<grpc::ClientReader<activity_log::ActivityFileChunk> > stream(_stub->downloadActivity(&context, request));
     
+    Container<threadfile::FileChunk> fileChunks;
+    activity_log::ActivityFileChunk chunk;
+    while (stream->Read(&chunk))
     {
-        std::ofstream out(gpxFileName);
-        activity_log::ActivityFileChunk chunk;
-        while (stream->Read(&chunk))
-        {
-            std::string chunkStr = chunk.data();
-            
-            out << chunkStr;
-        }
+        auto chunkData = chunk.data();
+        threadfile::FileChunk fileChunk(chunkData.size());
+        memcpy(fileChunk.data(), chunkData.data(), chunkData.size());
+        fileChunk.setSize(chunkData.size());
+
+        fileChunks.push(std::move(fileChunk));
+    }
+    fileChunks.done_pushing();
+
+    if (!threadfile::writeFile(gpxFileName, fileChunks))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error writing to GPX file");
     }
 
     return stream->Finish();

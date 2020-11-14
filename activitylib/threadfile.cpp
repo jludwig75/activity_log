@@ -1,7 +1,8 @@
 #include "threadfile.h"
 
 #include <fcntl.h>
-#include <unistd.h>
+ #include <string.h>
+ #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -18,6 +19,57 @@ FileChunk::FileChunk(size_t maxChunkSize)
 {
     _buffer = new uint8_t[_maxChunkSize];
 }
+
+FileChunk::FileChunk(const FileChunk& other)
+    :
+    _buffer(nullptr),
+    _maxChunkSize(other._maxChunkSize),
+    _size(other._size)
+{
+    _buffer = new uint8_t[_maxChunkSize]{};
+    if (_size > 0)
+    {
+        memcpy(_buffer, other._buffer, _size);
+    }
+}
+
+FileChunk& FileChunk::operator=(const FileChunk& other)
+{
+    _buffer = nullptr;
+    _maxChunkSize = other._maxChunkSize;
+    _size = other._size;
+    _buffer = new uint8_t[_maxChunkSize]{};
+    if (_size > 0)
+    {
+        memcpy(_buffer, other._buffer, _size);
+    }
+
+    return *this;
+}
+
+FileChunk::FileChunk(FileChunk&& other)
+    :
+    _buffer(other._buffer),
+    _maxChunkSize(other._maxChunkSize),
+    _size(other._size)
+{
+    other._buffer = nullptr;
+    other._maxChunkSize = 0;
+    other._size = 0;
+}
+
+FileChunk& FileChunk::operator=(FileChunk&& other)
+{
+    _buffer = other._buffer;
+    _maxChunkSize = other._maxChunkSize;
+    _size = other._size;
+    other._buffer = nullptr;
+    other._maxChunkSize = 0;
+    other._size = 0;
+
+    return *this;
+}
+
 
 FileChunk::~FileChunk()
 {
@@ -57,7 +109,10 @@ bool readFile(const std::string& fileName, size_t maxChunkSize, Container<FileCh
     {
         return false;
     }
-    ON_EXIT([fd]{ close(fd); });
+    ON_EXIT(([fd, &stream]{
+        close(fd);
+        stream.done_pushing();
+    }));
 
     while (true)
     {
@@ -79,7 +134,7 @@ bool readFile(const std::string& fileName, size_t maxChunkSize, Container<FileCh
     return true;
 }
 
-bool writeFile(const std::string& fileName, size_t maxChunkSize, Container<FileChunk>& stream)
+bool writeFile(const std::string& fileName, Container<FileChunk>& stream)
 {
     auto fd = open(fileName.c_str(), O_CREAT | O_WRONLY, DEFFILEMODE);
     if (fd < 0)

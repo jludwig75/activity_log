@@ -24,8 +24,8 @@ namespace
 
 bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activity)
 {
-    auto id = activityView["_id"].get_oid().value.to_string();;
-    auto name = activityView["name"].get_utf8().value.to_string();;
+    auto id = activityView["_id"].get_oid().value.to_string();
+    auto name = activityView["name"].get_utf8().value.to_string();
 
     activity.id = id;
     activity.set_name(name);
@@ -40,7 +40,10 @@ bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activit
         trackPoint.longitude = trackPointView["longitude"].get_double().value;
         trackPoint.altitude = trackPointView["altitude"].get_double().value;
         trackPoint.heartRate = trackPointView["heartRate"].get_int32().value;
-        activity.trackPoints.push(trackPoint);
+        trackPoint.startOfSegement = trackPointView["startOfSegement"].get_bool().value;
+        // TODO: Only retrieve if stored?
+        trackPoint.activityName = trackPointView["activityName"].get_utf8().value.to_string();
+        activity.trackPoints.push(std::move(trackPoint));
     }
 
     activity.analyzeTrackPoints();
@@ -62,6 +65,9 @@ bsoncxx::document::value serializeActivity(const Activity& activity)
                 << "longitude" << trackPoint.longitude
                 << "altitude" << trackPoint.altitude
                 << "heartRate" << static_cast<int>(trackPoint.heartRate)
+                << "startOfSegement" << trackPoint.startOfSegement
+                // TODO: only store if non-empty?
+                << "activityName" << trackPoint.activityName
                 << bsoncxx::builder::stream::close_document;
     }
 
