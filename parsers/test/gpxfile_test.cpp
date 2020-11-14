@@ -17,9 +17,9 @@ const size_t kTestFileChunkSize = 64 * 1024;
 bool readFile(const std::string& fileName, std::string& fileData)
 {
     Container<threadfile::FileChunk> chunks;
-    bool success = false;
-    std::thread reader([fileName, &chunks, &success]{
-        success = threadfile::readFile(fileName, kTestFileChunkSize, chunks);
+    bool readerSuccess = false;
+    std::thread reader([fileName, &chunks, &readerSuccess]{
+        readerSuccess = threadfile::readFile(fileName, kTestFileChunkSize, chunks);
     });
 
     threadfile::FileChunk chunk;
@@ -29,6 +29,10 @@ bool readFile(const std::string& fileName, std::string& fileData)
     }
 
     reader.join();
+    if (!readerSuccess)
+    {
+        return false;
+    }
 
     return true;
 }

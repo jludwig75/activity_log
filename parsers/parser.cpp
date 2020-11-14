@@ -19,5 +19,6 @@ bool Parser::parseActivityData(const std::string& activityData, Container<TrackP
         }
     }
 
+    output.done_pushing();
     return false;
 }

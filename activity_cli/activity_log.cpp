@@ -1,11 +1,13 @@
 #include "activity_log.h"
 
-#include <fstream>
+#include "threadfile.h"
+
+#include <thread>
 
 #include <grpcpp/client_context.h>
 
 
-#define MAX_DATA_CHUNCK_SIZE    (64 * 1024)
+const size_t  kMaxDataChunkSize = 64 * 1024;
 
 
 using grpc::ClientContext;
@@ -13,25 +15,6 @@ using grpc::ClientWriter;
 using grpc::ClientReader;
 using grpc::Status;
 
-
-namespace
-{
-
-std::string readFile(const std::string& fileName)
-{
-    std::ifstream t(fileName);
-    std::string str;
-
-    t.seekg(0, std::ios::end);
-    str.reserve(t.tellg());
-    t.seekg(0, std::ios::beg);
-
-    str.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-
-    return str;
-}
-
-}
 
 ActivityLog::ActivityLog(std::shared_ptr<grpc::Channel> channel)
     :
@@ -43,25 +26,30 @@ grpc::Status ActivityLog::uploadActivity(const std::string& activityFileName, Ac
 {
     ClientContext context;
 
-    // TODO: This is naive: It lacks error handling and may not handle binary data (i.e. FIT files)
-    std::string activityFileData = readFile(activityFileName);
+    Container<threadfile::FileChunk> fileChunks;
+    bool readerSuccess = false;
+    std::thread reader([activityFileName, &fileChunks, &readerSuccess]{
+        readerSuccess = threadfile::readFile(activityFileName, kMaxDataChunkSize, fileChunks);
+    });
 
     activity_log::Activity activity;
     std::unique_ptr<grpc::ClientWriter<activity_log::ActivityFileChunk> > stream(_stub->uploadActivity(&context, &activity));
 
-    std::string::size_type offset = 0;
-    while (offset < activityFileData.length())
+    for (const auto& fileChunk : fileChunks)
     {
         activity_log::ActivityFileChunk chunk;
-        std::string chunkData = activityFileData.substr(offset, MAX_DATA_CHUNCK_SIZE);
-        offset += chunkData.length();
-        chunk.set_data(chunkData);
+        chunk.set_data(fileChunk.data(), fileChunk.size());
         if (!stream->Write(std::move(chunk)))
         {
             break;
         }
     }
     stream->WritesDone();
+    reader.join();
+    if (!readerSuccess)
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error reading GPX file");
+    }
 
     auto status = stream->Finish();
 

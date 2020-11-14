@@ -1,7 +1,5 @@
 #include "activity.h"
 
-#include <fstream>
-
 #include "threadfile.h"
 
 using grpc::ClientContext;

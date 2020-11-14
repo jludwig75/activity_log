@@ -44,12 +44,9 @@ int main(int argc, char *argv[])
     auto activityData = readFile(fileName);
 
     Container<TrackPoint> output;
-    int ret = 0;
-    std::thread parserThread([&parser, &output, &activityData, &ret]{
-        if (!parser.parseActivityData(activityData, output))
-        {
-            ret = -1;
-        }
+    int parserRet = -1;
+    std::thread parserThread([&parser, &output, &activityData, &parserRet]{
+        parserRet = parser.parseActivityData(activityData, output) ? 0 : -1;
     });
 
     std::cout << "time,latitude,logitude,altitude\n";
@@ -60,7 +57,7 @@ int main(int argc, char *argv[])
     }
 
     parserThread.join();
-    if (ret == -1)
+    if (parserRet == -1)
     {
         std::cout << "Failed to parse \"" << fileName << "\"\n";
         return -1;
