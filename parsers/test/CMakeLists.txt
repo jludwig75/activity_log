@@ -17,6 +17,8 @@ add_executable(file_utils_test
 target_link_libraries(file_utils_test
                         catch2_main)
 
+catch_discover_tests(file_utils_test)
+
 
 ### parser test
 add_executable(parser_test
@@ -26,6 +28,8 @@ target_link_libraries(parser_test
                         catch2_main
                         parser)
 
+catch_discover_tests(parser_test)
+
 
 ### gpxparser test
 add_executable(gpxparser_test
@@ -34,3 +38,5 @@ add_executable(gpxparser_test
 target_link_libraries(gpxparser_test
                         catch2_main
                         parser)
+
+catch_discover_tests(gpxparser_test)

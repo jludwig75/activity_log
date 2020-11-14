@@ -40,7 +40,7 @@ const std::string simpleGpxFileData =
 "</gpx>\n";
 
 
-TEST_CASE( "gpxparser", "" ) {
+TEST_CASE( "parser", "" ) {
     SECTION( "parser simple GPX file" )
     {
         Parser parser;
