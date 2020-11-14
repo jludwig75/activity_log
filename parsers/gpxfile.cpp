@@ -147,6 +147,9 @@ bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream)
                     trackPoint.activityName = activityName;
                 }
 
+                // TODO: Add heart rate to GPX file parsing/generation
+                trackPoint.heartRate = 0;
+
                 startOfSegment = false;
                 stream.push(std::move(trackPoint));
             }
