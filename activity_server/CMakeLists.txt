@@ -12,5 +12,6 @@ target_include_directories(activity_server
 
 target_link_libraries(activity_server
                       activity_proto
+                      activitylib
                       parser
                       ${LIBMONGOCXX_LIBRARIES})

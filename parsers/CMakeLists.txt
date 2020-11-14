@@ -6,6 +6,7 @@ add_library(parser STATIC
             file_utils.cpp)
 
 target_link_libraries(parser
+                      activitylib
                       pugixml)
 
 set_target_properties(parser PROPERTIES

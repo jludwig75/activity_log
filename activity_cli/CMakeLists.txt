@@ -4,4 +4,5 @@ add_executable(activity
                activity_log.cpp)
 
 target_link_libraries(activity
-                      activity_proto)
+                      activity_proto
+                      activitylib)

@@ -448,6 +448,48 @@ public:
     }
 };
 
+class DownloadCommandHandler : public CommandHandler
+{
+public:
+    DownloadCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args) override
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        Activity activity;
+        auto status = activityLog.getActivity(args[0], activity);
+        if (!status.ok())
+        {
+            std::cout << "Failed to find activity " << args[0] << std::endl;
+            return -1;
+        }
+
+        return activity.downloadToGpx(args[1]).ok() ?  : -1;
+    }
+    virtual std::string syntax() const override
+    {
+        return name() + " <activity_id> <output_file_name>";
+    }
+    virtual std::string description() const override
+    {
+        return "download activity GPX file";
+    }
+    virtual size_t minNumberOfArgs() const override
+    {
+        return 2;
+    }
+    virtual size_t maxNumberOfArgs() const override
+    {
+        return 2;
+    }
+};
+
 class CommandRunner
 {
 public:
@@ -524,7 +566,8 @@ private:
         { "plot", std::make_shared<PlotCommandHandler>("plot") },
         { "track", std::make_shared<TrackCommandHandler>("track") },
         { "edit", std::make_shared<EditCommandHandler>("edit") },
-        { "delete", std::make_shared<DeleteCommandHandler>("delete") }
+        { "delete", std::make_shared<DeleteCommandHandler>("delete") },
+        { "download", std::make_shared<DownloadCommandHandler>("download") }
     };
 };
 

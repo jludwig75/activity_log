@@ -3,6 +3,11 @@
 #include <grpcpp/impl/codegen/status_code_enum.h>
 
 #include "activity.h"
+#include "gpxfile.h"
+
+
+// TODO: Can this go into the proto file?
+#define MAX_DATA_CHUNCK_SIZE    (64 * 1024)
 
 
 using grpc::Status;
@@ -244,10 +249,35 @@ grpc::Status ActivityLog::deleteActivity(grpc::ServerContext* context,
 
 
 grpc::Status ActivityLog::downloadActivity(grpc::ServerContext* context,
-                                const activity_log::ActivityRequest*,
+                                const activity_log::ActivityRequest* request,
                                 grpc::ServerWriter<activity_log::ActivityFileChunk>* stream)
 {
-    // TODO
+    Activity activity;
+    if (!_db.loadActivity(request->activity_id(), activity))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity " + request->activity_id());
+    }
+
+    std::string gpxFileData;
+    if (!gpxfile::generateFileData(activity.trackPoints, gpxFileData))
+    {
+        return grpc::Status(grpc::StatusCode::UNKNOWN, "Error generating GPX data for activity");
+    }
+
+    // stream data back
+    std::string::size_type offset = 0;
+    while (offset < gpxFileData.length())
+    {
+        activity_log::ActivityFileChunk chunk;
+        std::string chunkData = gpxFileData.substr(offset, MAX_DATA_CHUNCK_SIZE);
+        offset += chunkData.length();
+        chunk.set_data(chunkData);
+        if (!stream->Write(std::move(chunk)))
+        {
+            break;
+        }
+    }
+
     return Status::OK;
 }
 

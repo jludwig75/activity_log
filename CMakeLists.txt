@@ -45,11 +45,10 @@ else()
 set(_GRPC_CPP_PLUGIN_EXECUTABLE $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
 add_subdirectory(pugixml)
 add_subdirectory(catch2)
 add_subdirectory(activity_proto)
+add_subdirectory(activitylib)
 add_subdirectory(activity_cli)
 add_subdirectory(parsers)
 add_subdirectory(activity_server)
