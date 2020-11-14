@@ -1,5 +1,6 @@
 #include "gpxparser.h"
 
+#include "scopeguard.h"
 #include "file_utils.h"
 
 #include <cassert>
@@ -54,25 +55,6 @@ bool fromTimeString(const std::string& timeStr, std::time_t& time)
     time = timegm(&tm);
     return true;
 }
-
-class OnExit
-{
-public:
-    using ExitFunc = std::function<void(void)>;
-    OnExit(ExitFunc&& exitFunc)
-        :
-        _exitFunc(exitFunc)
-    {
-
-    }
-    ~OnExit()
-    {
-        _exitFunc();
-    }
-private:
-    ExitFunc _exitFunc;
-};
-#define ON_EXIT(func)   OnExit onExitBloc_##__FILE__##__LINE__(func)
 
 bool parseFile(const std::string& gpxFileData, Container<TrackPoint>& stream)
 {
