@@ -1,6 +1,7 @@
 #include "gpxparser.h"
 
 #include "scopeguard.h"
+#include "stringutils.h"
 #include "file_utils.h"
 
 #include <cassert>
@@ -23,15 +24,6 @@ bool isGpxFile(const std::string& gpxFileData)
     }
 
     return doc.child("gpx");
-}
-
-template<typename T>
-bool fromString(const std::string& str, T& value)
-{
-    std::stringstream ss(str);
-
-    ss >> value;
-    return !ss.bad() && ss.eof();
 }
 
 bool fromTimeString(const std::string& timeStr, std::time_t& time)

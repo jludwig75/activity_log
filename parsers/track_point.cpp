@@ -1,16 +1,10 @@
 #include "track_point.h"
 
-#include <cmath>
+#include "mathutils.h"
 
 
 namespace
 {
-
-template<typename ValueType>
-ValueType radians(ValueType v)
-{
-    return (v * M_PI) / 180.0;
-}
 
 double greatCircleDistance(const TrackPoint& pos1, const TrackPoint& pos2)
 {
