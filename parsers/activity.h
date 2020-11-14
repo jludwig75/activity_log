@@ -6,26 +6,17 @@
 
 #include "track_point.h"
 
-#include "container.h"
-
 
 class Activity
 {
 public:
-    Activity() = default;
-    Activity(const std::string& id)
-        :
-        id(id)
-    {
-    }
     void analyzeTrackPoints();
-    std::chrono::system_clock::time_point start_time() const;
-    std::chrono::system_clock::duration duration() const;
 
     std::string id;
-    std::string name() const;
-    void set_name(const std::string& name) const;
-    Container<TrackPoint> trackPoints;
+    std::string name;
+    std::chrono::system_clock::time_point start_time;
+    std::chrono::system_clock::duration duration() const;
+    std::vector<TrackPoint> trackPoints;
     struct ActivityStats
     {
         float total_distance;
@@ -37,7 +28,4 @@ public:
         double average_climbing_grade;
         double average_descending_grade;
     } stats{};
-
-private:
-    mutable std::string _name;
 };

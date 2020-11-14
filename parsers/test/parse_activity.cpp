@@ -40,23 +40,17 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    Container<TrackPoint> output;
-    int parserRet = -1;
-    std::thread parserThread([&parser, &output, &activityData, &parserRet]{
-        parserRet = parser.parseActivityData(activityData, output) ? 0 : -1;
-    });
-
-    std::cout << "time,latitude,logitude,altitude\n";
-    TrackPoint trackPoint;
-    while (output.pop(trackPoint))
-    {
-        std::cout << std::chrono::system_clock::to_time_t(trackPoint.time) << "," << trackPoint.latitude << "," << trackPoint.longitude << "," << trackPoint.altitude << std::endl;
-    }
-    parserThread.join();
-    if (parserRet == -1)
+    Activity activity;
+    if (!parser.parseActivityData(activityData, activity))
     {
         std::cout << "Failed to parse \"" << fileName << "\"\n";
         return -1;
+    }
+
+    std::cout << "time,latitude,logitude,altitude\n";
+    for (const auto& trackPoint: activity.trackPoints)
+    {
+        std::cout << std::chrono::system_clock::to_time_t(trackPoint.time) << "," << trackPoint.latitude << "," << trackPoint.longitude << "," << trackPoint.altitude << std::endl;
     }
 
     return 0;

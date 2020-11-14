@@ -69,10 +69,10 @@ TEST_CASE( "gpxfile", "" )
 
         REQUIRE(gpxfile::isFileDataSupported(fileData));
 
-        Container<TrackPoint> trackPoints;
-        REQUIRE(gpxfile::parseFileData(fileData, trackPoints));
+        Activity activity;
+        REQUIRE(gpxfile::parseFileData(fileData, activity));
 
-        REQUIRE(trackPoints.size() == 2113);
+        REQUIRE(activity.trackPoints.size() == 2113);
     }
     SECTION( "Parse, generate and reparse GPX file" )
     {
@@ -81,27 +81,27 @@ TEST_CASE( "gpxfile", "" )
 
         REQUIRE(gpxfile::isFileDataSupported(fileData));
 
-        Container<TrackPoint> trackPoints;
-        REQUIRE(gpxfile::parseFileData(fileData, trackPoints));
-        REQUIRE(trackPoints.size() == 2113);
+        Activity activity;
+        REQUIRE(gpxfile::parseFileData(fileData, activity));
+        REQUIRE(activity.trackPoints.size() == 2113);
 
         {
             std::string outputFileData;
-            REQUIRE(gpxfile::generateFileData(trackPoints, outputFileData));
+            REQUIRE(gpxfile::generateFileData(activity, outputFileData));
             REQUIRE(writeFile("delme.gpx", outputFileData));
         }
 
         std::string newFileData;
         REQUIRE(readFile("delme.gpx", newFileData));
 
-        Container<TrackPoint> newTrackPoints;
-        REQUIRE(gpxfile::parseFileData(newFileData, newTrackPoints));
-        REQUIRE(newTrackPoints.size() == 2113);
+        Activity newActivity;
+        REQUIRE(gpxfile::parseFileData(newFileData, newActivity));
+        REQUIRE(newActivity.trackPoints.size() == 2113);
 
-        for (size_t i = 0; i < newTrackPoints.size(); ++i)
+        for (size_t i = 0; i < newActivity.trackPoints.size(); ++i)
         {
-            const TrackPoint& oldTrackPoint = trackPoints[i];
-            const TrackPoint& newTrackPoint = newTrackPoints[i];
+            const TrackPoint& oldTrackPoint = activity.trackPoints[i];
+            const TrackPoint& newTrackPoint = newActivity.trackPoints[i];
 
             REQUIRE(newTrackPoint.time == oldTrackPoint.time);
             REQUIRE(newTrackPoint.latitude == oldTrackPoint.latitude);
@@ -109,7 +109,6 @@ TEST_CASE( "gpxfile", "" )
             REQUIRE(newTrackPoint.altitude == oldTrackPoint.altitude);
             REQUIRE(newTrackPoint.heartRate == oldTrackPoint.heartRate);
             REQUIRE(newTrackPoint.startOfSegement == oldTrackPoint.startOfSegement);
-            REQUIRE(newTrackPoint.activityName == oldTrackPoint.activityName);
         }
     }
 }

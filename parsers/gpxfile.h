@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "track_point.h"
+#include "activity.h"
 #include "container.h"
 
 
@@ -11,8 +11,8 @@ namespace gpxfile
 
 bool isFileDataSupported(const std::string& fileData);
 
-bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream);
+bool parseFileData(const std::string& fileData, Activity& activity);
 
-bool generateFileData(const Container<TrackPoint>& stream, std::string& fileData);
+bool generateFileData(const Activity& activity, std::string& fileData);
 
 } // namespace gpxfile

@@ -22,15 +22,15 @@ grpc::Status ActivityLog::uploadActivity(grpc::ServerContext* context,
     }
 
     Activity newActivity;
-    if (!_parser.parseActivityData(activityData, newActivity.trackPoints))
+    if (!_parser.parseActivityData(activityData, newActivity))
     {
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "Error parsing GPX data");
     }
 
-    if (newActivity.name().empty())
+    if (newActivity.name.empty())
     {
         // TODO: Maybe add the time or time of day to the name
-        newActivity.set_name("New Activity");
+        newActivity.name = "New Activity";
     }
     newActivity.analyzeTrackPoints();
 
@@ -221,7 +221,7 @@ grpc::Status ActivityLog::editActivity(grpc::ServerContext* context,
         return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity " + request->activity_id());
     }
 
-    retrievedActivity.set_name(newName);
+    retrievedActivity.name = newName;
     if (!_db.updateActivity(request->activity_id(), retrievedActivity))
     {
         return grpc::Status(grpc::StatusCode::UNKNOWN, "Error editing activity " + request->activity_id());
@@ -255,7 +255,7 @@ grpc::Status ActivityLog::downloadActivity(grpc::ServerContext* context,
     }
 
     std::string gpxFileData;
-    if (!gpxfile::generateFileData(activity.trackPoints, gpxFileData))
+    if (!gpxfile::generateFileData(activity, gpxFileData))
     {
         return grpc::Status(grpc::StatusCode::UNKNOWN, "Error generating GPX data for activity");
     }
@@ -282,9 +282,9 @@ void ActivityLog::toProto(const Activity& activity, activity_log::Activity* prot
     // id
     protoActivity->set_id(activity.id);
     // name
-    protoActivity->set_name(activity.name());
+    protoActivity->set_name(activity.name);
     // start_time
-    protoActivity->set_start_time(std::chrono::system_clock::to_time_t(activity.start_time()));
+    protoActivity->set_start_time(std::chrono::system_clock::to_time_t(activity.start_time));
     // duration
     protoActivity->set_duration(std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count());
     // total_distance

@@ -14,7 +14,7 @@ bool GpxParser::canParseActivityData(const std::string& activityData) const
     return gpxfile::isFileDataSupported(activityData);
 }
 
-bool GpxParser::parseActivityData(const std::string& activityData, Container<TrackPoint> &output) const
+bool GpxParser::parseActivityData(const std::string& activityData, Activity& activity) const
 {
-    return gpxfile::parseFileData(activityData, output);
+    return gpxfile::parseFileData(activityData, activity);
 }
