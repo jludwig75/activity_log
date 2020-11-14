@@ -56,7 +56,7 @@ float Activity::totalDescent() const
 
 float Activity::average_speed() const
 {
-    auto duration_ns = std::chrono::duration<float>(duration());    // TODO: make sure this conversion is ns -> ns
+    auto duration_ns = std::chrono::duration<float>(duration());
     auto duration_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration_ns).count();
     if (duration_seconds == 0)
     {
