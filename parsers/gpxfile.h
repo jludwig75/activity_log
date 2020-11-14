@@ -9,7 +9,7 @@
 namespace gpxfile
 {
 
-bool isSupportedFileData(const std::string& fileData);
+bool isFileDataSupported(const std::string& fileData);
 
 bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream);
 

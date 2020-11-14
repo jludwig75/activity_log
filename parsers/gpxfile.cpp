@@ -51,7 +51,7 @@ std::string toTimeString(std::time_t time)
 }
 
 
-bool isSupportedFileData(const std::string& fileData)
+bool isFileDataSupported(const std::string& fileData)
 {
     pugi::xml_document doc;
     auto result = doc.load_string(fileData.c_str());
