@@ -1,6 +1,7 @@
 #include "catch.hpp"
 
 #include <string>
+#include <thread>
 
 #include <string.h>
 
@@ -16,36 +17,43 @@ const size_t kTestFileChunkSize = 64 * 1024;
 bool readFile(const std::string& fileName, std::string& fileData)
 {
     Container<threadfile::FileChunk> chunks;
-    if (!threadfile::readFile(fileName, kTestFileChunkSize, chunks))
-    {
-        return false;
-    }
+    bool success = false;
+    std::thread reader([fileName, &chunks, &success]{
+        success = threadfile::readFile(fileName, kTestFileChunkSize, chunks);
+    });
 
-    for (const auto& chunk: chunks)
+    threadfile::FileChunk chunk;
+    while (chunks.pop(chunk))
     {
         fileData += std::string(chunk.data(), chunk.data() + chunk.size());
     }
+
+    reader.join();
 
     return true;
 }
 
 bool writeFile(const std::string& fileName, const std::string& fileData)
 {
-    std::string::size_type offset = 0;
     Container<threadfile::FileChunk> chunks;
-    while (offset < fileData.length())
-    {
-        threadfile::FileChunk chunk(kTestFileChunkSize);
-        auto chunkString = fileData.substr(offset, chunk.maxSize());
-        memcpy(chunk.data(), chunkString.data(), chunkString.length());
-        chunk.setSize(chunkString.length());
-        offset += chunkString.length();
+    std::thread chunker([fileName, fileData, &chunks]{
+        std::string::size_type offset = 0;
+        while (offset < fileData.length())
+        {
+            threadfile::FileChunk chunk(kTestFileChunkSize);
+            auto chunkString = fileData.substr(offset, chunk.maxSize());
+            memcpy(chunk.data(), chunkString.data(), chunkString.length());
+            chunk.setSize(chunkString.length());
+            offset += chunkString.length();
 
-        chunks.push(std::move(chunk));
-    }
-    chunks.done_pushing();
+            chunks.push(std::move(chunk));
+        }
+        chunks.done_pushing();
+    });
 
-    return threadfile::writeFile(fileName, chunks);
+    auto ret = threadfile::writeFile(fileName, chunks);
+    chunker.join();
+    return ret;
 }
 
 TEST_CASE( "gpxfile", "" )

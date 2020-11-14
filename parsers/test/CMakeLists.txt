@@ -48,6 +48,7 @@ add_executable(gpxfile_test
 
 target_link_libraries(gpxfile_test
                         catch2_main
-                        parser)
+                        parser
+                        pthread)
 
 catch_discover_tests(gpxfile_test)

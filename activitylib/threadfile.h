@@ -13,6 +13,7 @@ namespace threadfile
 class FileChunk
 {
 public:
+    FileChunk();
     FileChunk(size_t maxChunkSize);
     ~FileChunk();
     FileChunk(const FileChunk& other);

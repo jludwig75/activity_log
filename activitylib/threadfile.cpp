@@ -11,6 +11,14 @@
 namespace threadfile
 {
 
+FileChunk::FileChunk()
+    :
+    _buffer(nullptr),
+    _maxChunkSize(0),
+    _size(0)
+{
+}
+
 FileChunk::FileChunk(size_t maxChunkSize)
     :
     _buffer(nullptr),
@@ -143,7 +151,8 @@ bool writeFile(const std::string& fileName, Container<FileChunk>& stream)
     }
     ON_EXIT([fd]{ close(fd); });
 
-    for (const auto& chunk : stream)
+    threadfile::FileChunk chunk;
+    while (stream.pop(chunk))
     {
         size_t writeOffset = 0;
         while (writeOffset < chunk.size())
