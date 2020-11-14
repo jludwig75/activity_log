@@ -15,24 +15,14 @@ public:
     {
     }
 
-    Container(const Container& other)
-        :
-        _deque(other._deque),
-        _done_pushing(other._done_pushing)
-    {
-        // TODO: Not sure if it makse sense to always assert this.
-        // Might be too obscure, but it could be a bug.
-        //assert(other._done_pushing);
-    }
-    Container& operator=(const Container& other)
-    {
-        // TODO: Not sure if it makse sense to always assert this.
-        // Might be too obscure, but it could be a bug.
-        //assert(other._done_pushing);
-        _deque = other._deque;
-        _done_pushing = other._done_pushing;   // Can't handle this, because there will be no writer.
-        return *this;
-    }
+    Container(const Container& other) = delete;
+    Container& operator=(const Container& other) = delete;
+
+    // TODO: We can support a move operatore, but I think the synchronization
+    // members might need to be copied to a unique_ptr managed struct oe moved
+    // with std::move.
+    Container(Container&& other) = delete;
+    Container& operator=(Container&& other) = delete;
 
     bool pop(DataType& data)
     {
@@ -66,87 +56,6 @@ public:
             _done_pushing = true;
         }
         _cond.notify_one();
-    }
-
-    size_t size() const
-    {
-        std::unique_lock lock(_lock);
-        return _deque.size();
-    }
-
-    bool empty() const
-    {
-        return _deque.empty();
-    }
-
-    typename std::deque<DataType>::iterator begin()
-    {
-        return _deque.begin();
-    }
-
-    typename std::deque<DataType>::iterator end()
-    {
-        return _deque.end();
-    }
-
-    typename std::deque<DataType>::const_iterator begin() const
-    {
-        return _deque.begin();
-    }
-
-    typename std::deque<DataType>::const_iterator end() const
-    {
-        return _deque.end();
-    }
-
-    typename std::deque<DataType>::const_iterator cbegin() const
-    {
-        return _deque.cbegin();
-    }
-
-    typename std::deque<DataType>::const_iterator cend() const
-    {
-        return _deque.cend();
-    }
-
-    DataType& front()
-    {
-        return _deque.front();
-    }
-
-    DataType& back()
-    {
-        return _deque.back();
-    }
-
-    const DataType& front() const
-    {
-        return _deque.front();
-    }
-
-    const DataType& back() const
-    {
-        return _deque.back();
-    }
-
-    DataType& operator[](size_t i)
-    {
-        return _deque[i];
-    }
-
-    const DataType& operator[](size_t i) const
-    {
-        return _deque[i];
-    }
-
-    DataType& at(size_t i)
-    {
-        return _deque.at(i);
-    }
-
-    const DataType& at(size_t i) const
-    {
-        return _deque.at(i);
     }
 
 private:

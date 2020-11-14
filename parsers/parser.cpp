@@ -9,16 +9,15 @@ Parser::Parser()
 {
 }
 
-bool Parser::parseActivityData(const std::string& activityData, Container<TrackPoint> &output) const
+bool Parser::parseActivityData(const std::string& activityData, Activity& activity) const
 {
     for (const auto& parser : _parsers)
     {
         if (parser->canParseActivityData(activityData))
         {
-            return parser->parseActivityData(activityData, output);
+            return parser->parseActivityData(activityData, activity);
         }
     }
 
-    output.done_pushing();
     return false;
 }

@@ -63,9 +63,9 @@ bool isFileDataSupported(const std::string& fileData)
     return doc.child("gpx");
 }
 
-bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream)
+bool parseFileData(const std::string& fileData, Activity& activity)
 {
-    ON_EXIT([&stream]{ stream.done_pushing(); });
+    auto& stream = activity.trackPoints;
     pugi::xml_document doc;
     auto result = doc.load_string(fileData.c_str());
     if (!result)
@@ -79,15 +79,35 @@ bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream)
         return false;
     }
 
-    std::string activityName;
+    {
+        auto metadataElement = gpxElement.child("metadata");
+        if (!metadataElement)
+        {
+            return false;
+        }
+
+        auto timeElelment = metadataElement.child("time");
+        if (!timeElelment)
+        {
+            return false;
+        }
+
+        auto timeStr = timeElelment.text().as_string();
+        std::time_t time;
+        if (!internal::fromTimeString(timeStr, time))
+        {
+            return false;
+        }
+        activity.start_time = std::chrono::system_clock::from_time_t(time);
+    }
+
     for (pugi::xml_node trkElement: gpxElement.children("trk"))
     {
-        if (activityName.empty())
         {
             auto nameElement = trkElement.child("name");
             if (nameElement)
             {
-                activityName = nameElement.child_value();
+                activity.name = nameElement.text().as_string();
             }
         }
 
@@ -129,12 +149,9 @@ bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream)
                 {
                     return false;
                 }
-                if (!fromString(eleElement.child_value(), trackPoint.altitude))
-                {
-                    return false;
-                }
+                trackPoint.altitude = eleElement.text().as_double();
                 std::time_t time;
-                if (!internal::fromTimeString(timeElement.child_value(), time))
+                if (!internal::fromTimeString(timeElement.text().as_string(), time))
                 {
                     return false;
                 }
@@ -142,16 +159,11 @@ bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream)
 
                 trackPoint.startOfSegement = startOfSegment;
 
-                if (stream.empty() && !activityName.empty())
-                {
-                    trackPoint.activityName = activityName;
-                }
-
                 // TODO: Add heart rate to GPX file parsing/generation
                 trackPoint.heartRate = 0;
 
                 startOfSegment = false;
-                stream.push(std::move(trackPoint));
+                stream.push_back(std::move(trackPoint));
             }
         }
     }
@@ -159,8 +171,9 @@ bool parseFileData(const std::string& fileData, Container<TrackPoint>& stream)
     return true;
 }
 
-bool generateFileData(const Container<TrackPoint>& stream, std::string& fileData)
+bool generateFileData(const Activity& activity, std::string& fileData)
 {
+    auto& stream = activity.trackPoints;
     if (stream.empty())
     {
         return false;
@@ -191,7 +204,7 @@ bool generateFileData(const Container<TrackPoint>& stream, std::string& fileData
         metadataElement.set_name("metadata");
         auto timeElement = metadataElement.append_child();
         timeElement.set_name("time");
-        timeElement.text().set(internal::toTimeString(std::chrono::system_clock::to_time_t(stream.front().time)).c_str());
+        timeElement.text().set(internal::toTimeString(std::chrono::system_clock::to_time_t(activity.start_time)).c_str());
     }
 
     auto trkEelment = gpxElement.append_child();
@@ -200,7 +213,7 @@ bool generateFileData(const Container<TrackPoint>& stream, std::string& fileData
     {
         auto nameElement = trkEelment.append_child();
         nameElement.set_name("name");
-        nameElement.text().set(stream.front().activityName.c_str());
+        nameElement.text().set(activity.name.c_str());
     }
 
     {

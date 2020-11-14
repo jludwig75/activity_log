@@ -26,9 +26,10 @@ bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activit
 {
     auto id = activityView["_id"].get_oid().value.to_string();
     auto name = activityView["name"].get_utf8().value.to_string();
+    activity.start_time = std::chrono::system_clock::from_time_t(activityView["startTime"].get_int64().value);
 
     activity.id = id;
-    activity.set_name(name);
+    activity.name = name;
 
     auto trackPoints = activityView["trackPoints"].get_array().value;
     for (const auto& trackPointElement : trackPoints)
@@ -41,9 +42,7 @@ bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activit
         trackPoint.altitude = trackPointView["altitude"].get_double().value;
         trackPoint.heartRate = trackPointView["heartRate"].get_int32().value;
         trackPoint.startOfSegement = trackPointView["startOfSegement"].get_bool().value;
-        // TODO: Only retrieve if stored?
-        trackPoint.activityName = trackPointView["activityName"].get_utf8().value.to_string();
-        activity.trackPoints.push(std::move(trackPoint));
+        activity.trackPoints.push_back(std::move(trackPoint));
     }
 
     activity.analyzeTrackPoints();
@@ -55,7 +54,9 @@ bsoncxx::document::value serializeActivity(const Activity& activity)
 {
     auto builder = bsoncxx::builder::stream::document{};
 
-    auto inArray = builder << "name" << activity.name() << "trackPoints" << bsoncxx::builder::stream::open_array;
+    auto inArray = builder << "name" << activity.name
+                    << "startTime" << std::chrono::system_clock::to_time_t(activity.start_time)
+                    << "trackPoints" << bsoncxx::builder::stream::open_array;
 
     for (const auto& trackPoint : activity.trackPoints)
     {
@@ -66,8 +67,6 @@ bsoncxx::document::value serializeActivity(const Activity& activity)
                 << "altitude" << trackPoint.altitude
                 << "heartRate" << static_cast<int>(trackPoint.heartRate)
                 << "startOfSegement" << trackPoint.startOfSegement
-                // TODO: only store if non-empty?
-                << "activityName" << trackPoint.activityName
                 << bsoncxx::builder::stream::close_document;
     }
 

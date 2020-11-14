@@ -32,7 +32,8 @@ grpc::Status ActivityLog::uploadActivity(const std::string& activityFileName, Ac
     activity_log::Activity activity;
     std::unique_ptr<grpc::ClientWriter<activity_log::ActivityFileChunk> > stream(_stub->uploadActivity(&context, &activity));
 
-    for (const auto& fileChunk : fileChunks)
+    threadfile::FileChunk fileChunk;
+    while (fileChunks.pop(fileChunk))
     {
         activity_log::ActivityFileChunk chunk;
         chunk.set_data(fileChunk.data(), fileChunk.size());

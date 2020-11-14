@@ -1,53 +1,23 @@
 #include "activity.h"
 
+#include <cassert>
 
-std::chrono::system_clock::time_point Activity::start_time() const
-{
-    if (trackPoints.empty())
-    {
-        return std::chrono::system_clock::from_time_t(0);
-    }
-    return trackPoints.front().time;
-}
+
 std::chrono::system_clock::duration Activity::duration() const
 {
     if (trackPoints.empty())
     {
         return std::chrono::seconds(0);
     }
-    return trackPoints.back().time - trackPoints.front().time;
+    return trackPoints.back().time - start_time;
 }
-
-std::string Activity::name() const
-{
-    if (!_name.empty() || trackPoints.empty())
-    {
-        return _name;
-    }
-
-    if (!trackPoints[0].activityName.empty())
-    {
-        _name = trackPoints[0].activityName;
-        const_cast<Activity*>(this)->trackPoints[0].activityName = "";
-    }
-    return _name;
-}
-
-void Activity::set_name(const std::string& name) const
-{
-    _name = name;
-}
-
 
 void Activity::analyzeTrackPoints()
 {
     stats = {};
     TrackPoint previous;
     unsigned intervalCount = 0;
-    if (!_name.empty())
-    {
-        trackPoints.front().activityName = _name;
-    }
+
     for (const auto& trackPoint : trackPoints)
     {
         if (trackPoint.time > trackPoints.front().time)

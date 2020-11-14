@@ -29,7 +29,6 @@ public:
     float altitude;
     unsigned heartRate;
     bool startOfSegement;
-    std::string activityName;
 };
 
 
