@@ -110,7 +110,7 @@ public:
         std::cout << "Retrieved " << std::to_string(activities.size()) << " activities:\n";
         for (const auto& activity : activities)
         {
-            std::cout << "\t" <<  activity.id() << " - \"" << activity.name() << "\": " << m_to_km(activity.totalDistance()) << " km, " << activity.totalAscent() << " meters ascent\n";
+            std::cout << "\t" <<  activity.id() << " - \"" << activity.name() << "\": " << m_to_miles(activity.totalDistance()) << " miles, " << m_to_ft(activity.totalAscent()) << " feet ascent\n";
         }
 
         return 0;
@@ -149,8 +149,8 @@ public:
         std::cout << "Cummulative activtiy stats:\n";
         std::cout << "\tNumber of activities: " << stats.total_activities() << std::endl;
         std::cout << "\tTime spent: " << stats.total_time() << " seconds" << std::endl;
-        std::cout << "\tTotal distance: " << m_to_km(stats.total_distance()) << " km" << std::endl;
-        std::cout << "\tTotla climbing: " << stats.total_ascent() << " meters" << std::endl;
+        std::cout << "\tTotal distance: " << m_to_miles(stats.total_distance()) << " miles" << std::endl;
+        std::cout << "\tTotla climbing: " << m_to_ft(stats.total_ascent()) << " feet" << std::endl;
 
         return 0;
     }
