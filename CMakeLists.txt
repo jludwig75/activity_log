@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # set the project name
 project(activity_log VERSION 1.0)
 
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+
 find_package(Threads REQUIRED)
 find_package(Catch2 REQUIRED)
 find_package(libmongocxx REQUIRED)
