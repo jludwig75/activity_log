@@ -5,7 +5,6 @@
 #include "file_utils.h"
 
 #include <cassert>
-#include <functional>
 #include <iomanip>
 #include <sstream>
 

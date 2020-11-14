@@ -1,6 +1,10 @@
 #include "catch.hpp"
 
+#include <iostream>
+
 #include "../gpxparser.h"
+
+#include "../gpxfile.h"
 
 
 const std::string simpleGpxFileData = 
@@ -84,3 +88,16 @@ TEST_CASE( "gpxparser", "" ) {
     }
 }
 
+TEST_CASE("Generate GPX File", "")
+{
+    GpxParser parser;
+    REQUIRE(parser.canParseActivityData(simpleGpxFileData));
+
+    Container<TrackPoint> output;
+    REQUIRE(parser.parseActivityData(simpleGpxFileData, output));
+
+    std::string gpxFileData;
+    REQUIRE(gpxfile::generateFileData(output, gpxFileData));
+
+    std::cout << gpxFileData;
+}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iomanip>
 #include <sstream>
 
 
@@ -12,3 +13,11 @@ bool fromString(const std::string& str, T& value)
     return !ss.bad() && ss.eof();
 }
 
+template<typename T>
+std::string floatToString(T t, size_t precision)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(precision) << t;
+
+    return ss.str();
+}
