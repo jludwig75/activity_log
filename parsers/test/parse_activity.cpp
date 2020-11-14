@@ -1,5 +1,3 @@
-#include <chrono>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <thread>
@@ -7,25 +5,7 @@
 
 #include "parser.h"
 
-
-namespace
-{
-
-std::string readFile(const std::string& fileName)
-{
-    std::ifstream t(fileName);
-    std::string str;
-
-    t.seekg(0, std::ios::end);
-    str.reserve(t.tellg());
-    t.seekg(0, std::ios::beg);
-
-    str.assign((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-
-    return str;
-}
-
-}
+#include "threadfile.h"
 
 
 int main(int argc, char *argv[])
@@ -41,7 +21,24 @@ int main(int argc, char *argv[])
     Parser parser;
 
     auto fileName = args[0];
-    auto activityData = readFile(fileName);
+    Container<threadfile::FileChunk> chunks;
+    bool readerSuccess = false;
+    std::thread reader([fileName, &chunks, &readerSuccess]{
+        readerSuccess = threadfile::readFile(fileName, 64 * 1024, chunks);
+    });
+
+    std::string activityData;
+    threadfile::FileChunk chunk;
+    while(chunks.pop(chunk))
+    {
+        activityData += std::string(chunk.data(), chunk.data() + chunk.size());
+    }
+    reader.join();
+    if (!readerSuccess)
+    {
+        std::cout << "Failed to read activity file \"" << fileName << "\"\n";
+        return -1;
+    }
 
     Container<TrackPoint> output;
     int parserRet = -1;
@@ -55,7 +52,6 @@ int main(int argc, char *argv[])
     {
         std::cout << std::chrono::system_clock::to_time_t(trackPoint.time) << "," << trackPoint.latitude << "," << trackPoint.longitude << "," << trackPoint.altitude << std::endl;
     }
-
     parserThread.join();
     if (parserRet == -1)
     {
