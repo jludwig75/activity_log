@@ -413,7 +413,7 @@ public:
         }
 
         std::cout << "Activity " << activity.id() << std::endl;
-        std::cout << "\tName: " << activity.name() << std::endl;
+        std::cout << "\tname: " << activity.name() << std::endl;
         // TODO: Make human readable
         std::cout << "\tstartTime: " << std::chrono::system_clock::to_time_t(activity.startTime()) << std::endl;
         // TODO: Show as HMS
@@ -421,12 +421,12 @@ public:
         std::cout << "\ttotalDistance: " << m_to_miles(activity.totalDistance()) << " miles" << std::endl;
         std::cout << "\ttotalAscent: " << m_to_ft(activity.totalAscent()) << " feet" << std::endl;
         std::cout << "\ttotalDescent: " << m_to_ft(activity.totalDescent()) << " feet" << std::endl;
-        std::cout << "\taverage_speed: " << mps_to_mph(activity.average_speed()) << " mph" << std::endl;
-        std::cout << "\tmax_speed: " << mps_to_mph(activity.max_speed()) << " mph" << std::endl;
-        std::cout << "\taverage_heart_rate: " << activity.average_heart_rate() << " bpm" << std::endl;
-        std::cout << "\tmax_heart_rate: " << activity.max_heart_rate() << " bpm" << std::endl;
-        std::cout << "\taverage_climbing_grade: " << 100.0 * activity.average_climbing_grade() << "%" << std::endl;
-        std::cout << "\taverage_descending_grade: " << 100.0 * activity.average_descending_grade() << "%" << std::endl;
+        std::cout << "\taverageSpeed: " << mps_to_mph(activity.average_speed()) << " mph" << std::endl;
+        std::cout << "\tmaxSpeed: " << mps_to_mph(activity.max_speed()) << " mph" << std::endl;
+        std::cout << "\taverageHeartRate: " << activity.average_heart_rate() << " bpm" << std::endl;
+        std::cout << "\tmaxHeartRate: " << activity.max_heart_rate() << " bpm" << std::endl;
+        std::cout << "\taverageClimbingGrade: " << 100.0 * activity.average_climbing_grade() << "%" << std::endl;
+        std::cout << "\taverageDescendingGrade: " << 100.0 * activity.average_descending_grade() << "%" << std::endl;
 
         return 0;
     }
@@ -470,7 +470,7 @@ public:
             return -1;
         }
 
-        return activity.downloadToGpx(args[1]).ok() ?  : -1;
+        return activity.downloadToGpx(args[1]).ok() ? 0 : -1;
     }
     virtual std::string syntax() const override
     {
@@ -487,6 +487,48 @@ public:
     virtual size_t maxNumberOfArgs() const override
     {
         return 2;
+    }
+};
+
+class DeleteAllCommandHandler : public CommandHandler
+{
+public:
+    DeleteAllCommandHandler(const std::string& name)
+        :
+        CommandHandler(name)
+    {
+    }
+
+    virtual int runCommand(const std::vector<std::string>& args) override
+    {
+        auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+        ActivityLog activityLog(channel);
+
+        std::vector<Activity> activities;
+        if (!activityLog.listActivities(std::chrono::system_clock::from_time_t(0), std::chrono::system_clock::now(), activities).ok())
+        {
+            std::cout << "Failed to list activities\n";
+            return -1;
+        }
+
+        for (auto& activity : activities)
+        {
+            if (!activity.del().ok())
+            {
+                std::cout << "Failed to delete activity " << args[0] << std::endl;
+                return -1;
+            }
+        }
+
+        return 0;
+    }
+    virtual std::string syntax() const override
+    {
+        return name();
+    }
+    virtual std::string description() const override
+    {
+        return "deletes all activities";
     }
 };
 
@@ -567,7 +609,8 @@ private:
         { "track", std::make_shared<TrackCommandHandler>("track") },
         { "edit", std::make_shared<EditCommandHandler>("edit") },
         { "delete", std::make_shared<DeleteCommandHandler>("delete") },
-        { "download", std::make_shared<DownloadCommandHandler>("download") }
+        { "download", std::make_shared<DownloadCommandHandler>("download") },
+        { "deleteall", std::make_shared<DeleteAllCommandHandler>("deleteall") }
     };
 };
 

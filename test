@@ -1,9 +1,44 @@
 #!/bin/bash
 
+case "$*" in (*-h*)
+echo "Builds project configs and runs all tests"
+echo "command line options:"
+echo "  -h    shows this screen"
+echo "  -v    runs all configs: release, debug, minimal-size release, release with debug info"
+exit
+esac
+
 mkdir -p build
 pushd build
+
+echo "=== Testing release build ==="
 cmake ..
 make clean
 make -j4
 make test
+
+case "$*" in (*-v*)
+
+# These builds put some variation in the code for testing
+
+echo "=== Testing minimum-size release build ==="
+cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
+make clean
+make -j4
+make test
+
+echo "=== Testing release with debug info build ==="
+cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+make clean
+make -j4
+make test
+
+esac
+
+echo "=== Testing debug build ==="
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+make clean
+make -j4
+make test
+
 popd
