@@ -1,3 +1,4 @@
+import calendar
 import json
 import sys
 import time
@@ -6,7 +7,7 @@ import xml.etree.ElementTree as ET
 GPX_TIME_STR = r'%Y-%m-%dT%H:%M:%SZ'
 
 def _parseGpxTimeString(timeString):
-    return int(time.mktime(time.strptime(timeString, GPX_TIME_STR)))
+    return int(calendar.timegm(time.strptime(timeString, GPX_TIME_STR)))
 
 class ParsedActivity:
     def __init__(self, name, startTime):

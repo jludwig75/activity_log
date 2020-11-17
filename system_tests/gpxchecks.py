@@ -22,10 +22,67 @@ def compareGpxFiles(file1Name, file2Name):
     return True
 
 def validateGpxPlot(gpxFileName, dataPoints):
-    return True    # TODO: Implement this
+    activity = parseGpxFile(gpxFileName)
+    if activity == None:
+        return False
+
+    if len(activity.trackPoints) -1 != len(dataPoints):
+        return False
+    
+    if (len(dataPoints) < 1):
+        return True
+    
+    startTime = activity.trackPoints[0].time
+    cummulativeAscent = 0
+    cummulativeDescent = 0
+    for i in range(len(dataPoints)):
+        trackPoint = activity.trackPoints[i + 1]
+        dp = dataPoints[i]
+
+        altitudeChange = trackPoint.altitude - activity.trackPoints[i].altitude
+        if altitudeChange > 0:
+            cummulativeAscent += altitudeChange
+        elif altitudeChange < 0:
+            cummulativeDescent += -altitudeChange
+
+        if (trackPoint.time - startTime) != dp['time']:
+            return False
+        if abs(trackPoint.altitude - dp['altitude']) >= 0.1:
+            return False
+        if abs(cummulativeAscent - dp['cummulative_ascent']) >= 0.1:
+            return False
+        if abs(cummulativeDescent - dp['cummulative_descent']) >= 0.1:
+            return False
+        if trackPoint.heartRate != dp['heart_rate']:
+            return False
+        # TODO: cummulative_distance, speed, grade require great circle
+        # distance maybe do this later. Maybe not though, because it could be
+        # covered in the gpxfile unit test or even comparing the "get" output
+        # for cumulative distance
+
+    return True
 
 def validateGpxTrack(gpxFileName, trackPoints):
-    return True    # TODO: Implement this
+    activity = parseGpxFile(gpxFileName)
+    if activity == None:
+        return False
+
+    if len(activity.trackPoints) != len(trackPoints):
+        return False
+    
+    for i in range(len(trackPoints)):
+        trackPoint = activity.trackPoints[i]
+        tp = trackPoints[i]
+        if trackPoint.time != tp['time']:
+            return False
+        if abs(trackPoint.latitude - tp['latitude']) >= 0.0000001:
+            return False
+        if abs(trackPoint.longitude - tp['longitude']) >= 0.0000001:
+            return False
+        if abs(trackPoint.altitude - tp['altitude']) >= 0.1:
+            return False
+
+    return True
 
 if __name__ == "__main__":
     gpxFileName = sys.argv[1]
