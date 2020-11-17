@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import unittest
 from activitylog import ActivityLog
 from gpxchecks import compareGpxFiles, validateGpxPlot, validateGpxTrack
@@ -6,6 +7,7 @@ from gpxchecks import compareGpxFiles, validateGpxPlot, validateGpxTrack
 
 class ActivityLogSystemTest(unittest.TestCase):
     def setUp(self):
+        os.system('pkill -f activity_server')
         self.activityLog = ActivityLog()
         self.activityLog.start()
         self.activityLog.deleteAllActivities()
@@ -14,6 +16,7 @@ class ActivityLogSystemTest(unittest.TestCase):
         self.activityLog.deleteAllActivities()
         self.activityLog.stop()
         del self.activityLog
+        os.system('pkill -f activity_server')
 
     def test_upload(self):
         activityLog = self.activityLog
@@ -23,11 +26,13 @@ class ActivityLogSystemTest(unittest.TestCase):
 
         # Validate that activity is a valid activity
         self.assertTrue(len(activity.id) > 0)
-        self.assertEqual(activity.name, "Big CC Loop")
-        self.assertTrue(activity.startTime > 0)
 
     def test_list(self):
         activityLog = self.activityLog
+
+        # No activities at start of test
+        activityList = activityLog.listActivities()
+        self.assertEqual(len(activityList), 0)
 
         # Upload one activity
         activity1 = activityLog.uploadActivity("../../Big_CC_Loop.gpx")
@@ -63,9 +68,17 @@ class ActivityLogSystemTest(unittest.TestCase):
         # Validate that activity is a valid activity
         self.assertTrue(len(activity.id) > 0)
         self.assertEqual(activity.name, "Big CC Loop")
-        self.assertTrue(activity.startTime > 0)
-
-        # TODO: Validate additionl activity fields/stats that "get" returns
+        self.assertEqual(activity.startTime, 1604162115)
+        self.assertEqual(activity.duration, 13338)
+        self.assertEqual(activity.totalDistance, 24.2352)
+        self.assertEqual(activity.totalAscent, 3992.12)
+        self.assertEqual(activity.totalDescent, 3992.45)
+        self.assertEqual(activity.averageSpeed, 6.54121)
+        self.assertEqual(activity.maxSpeed, 21.1191)
+        self.assertEqual(activity.averageHeartRate, 0)
+        self.assertEqual(activity.maxHeartRate, 0)
+        self.assertEqual(activity.averageClimbingGrade, r'7.2984%')
+        self.assertEqual(activity.averageDescendingGrade, r'-6.37192%')
 
     def test_delete(self):
         activityLog = self.activityLog
