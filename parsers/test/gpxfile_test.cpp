@@ -16,7 +16,7 @@ const size_t kTestFileChunkSize = 64 * 1024;
 
 bool readFile(const std::string& fileName, std::string& fileData)
 {
-    Container<threadfile::FileChunk> chunks;
+    InterThreadQueue<threadfile::FileChunk> chunks;
     bool readerSuccess = false;
     std::thread reader([fileName, &chunks, &readerSuccess]{
         readerSuccess = threadfile::readFile(fileName, kTestFileChunkSize, chunks);
@@ -39,7 +39,7 @@ bool readFile(const std::string& fileName, std::string& fileData)
 
 bool writeFile(const std::string& fileName, const std::string& fileData)
 {
-    Container<threadfile::FileChunk> chunks;
+    InterThreadQueue<threadfile::FileChunk> chunks;
     std::thread chunker([fileName, fileData, &chunks]{
         std::string::size_type offset = 0;
         while (offset < fileData.length())

@@ -188,7 +188,7 @@ grpc::Status Activity::downloadToGpx(const std::string& gpxFileName) const
 
     std::unique_ptr<grpc::ClientReader<activity_log::ActivityFileChunk> > stream(_stub->downloadActivity(&context, request));
     
-    Container<threadfile::FileChunk> fileChunks;
+    InterThreadQueue<threadfile::FileChunk> fileChunks;
     std::thread downloader([&stream, &fileChunks]{
         activity_log::ActivityFileChunk chunk;
         while (stream->Read(&chunk))
