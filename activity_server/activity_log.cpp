@@ -287,6 +287,8 @@ void ActivityLog::toProto(const Activity& activity, activity_log::Activity* prot
     protoActivity->set_start_time(std::chrono::system_clock::to_time_t(activity.start_time));
     // duration
     protoActivity->set_duration(std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count());
+    // moving_time
+    protoActivity->set_moving_time(std::chrono::duration_cast<std::chrono::seconds>(activity.stats.movingTime).count());
     // total_distance
     protoActivity->set_total_distance(activity.stats.total_distance);
     // total_ascent

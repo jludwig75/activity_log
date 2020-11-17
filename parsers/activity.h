@@ -27,5 +27,6 @@ public:
         uint32_t max_heart_rate;
         double average_climbing_grade;
         double average_descending_grade;
+        std::chrono::system_clock::duration movingTime;
     } stats{};
 };

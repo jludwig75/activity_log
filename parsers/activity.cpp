@@ -60,6 +60,12 @@ void Activity::analyzeTrackPoints()
                 stats.max_speed = speed;
             }
 
+            if (speed > 0.3048) // Have to move at least a foot in 1 second to be considered moving
+            {
+                stats.movingTime += trackPoint.time - previous.time;
+            }
+
+
             // average heart rate
             // cast to uint64_t for calculation to prevent overflow.
             stats.average_heart_rate = static_cast<uint32_t>((static_cast<uint64_t>(stats.average_heart_rate) * (intervalCount - 1) + trackPoint.heartRate) / intervalCount);

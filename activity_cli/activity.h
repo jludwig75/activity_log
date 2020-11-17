@@ -18,11 +18,13 @@ public:
 
     std::chrono::system_clock::time_point startTime() const;
     std::chrono::system_clock::duration duration() const;
+    std::chrono::system_clock::duration movingTime() const;
 
     float totalDistance() const;
     float totalAscent() const;
     float totalDescent() const;
     float average_speed() const;
+    float moving_average_speed() const;
     float max_speed() const;
     uint32_t average_heart_rate() const;
     uint32_t max_heart_rate() const;

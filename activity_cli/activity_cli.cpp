@@ -418,10 +418,12 @@ public:
         std::cout << "\tstartTime: " << std::chrono::system_clock::to_time_t(activity.startTime()) << std::endl;
         // TODO: Show as HMS
         std::cout << "\tduration: " << std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count() << std::endl;
+        std::cout << "\tmovingTime: " << std::chrono::duration_cast<std::chrono::seconds>(activity.movingTime()).count() << std::endl;
         std::cout << "\ttotalDistance: " << m_to_miles(activity.totalDistance()) << " miles" << std::endl;
         std::cout << "\ttotalAscent: " << m_to_ft(activity.totalAscent()) << " feet" << std::endl;
         std::cout << "\ttotalDescent: " << m_to_ft(activity.totalDescent()) << " feet" << std::endl;
         std::cout << "\taverageSpeed: " << mps_to_mph(activity.average_speed()) << " mph" << std::endl;
+        std::cout << "\tmovingAverageSpeed: " << mps_to_mph(activity.moving_average_speed()) << " mph" << std::endl;
         std::cout << "\tmaxSpeed: " << mps_to_mph(activity.max_speed()) << " mph" << std::endl;
         std::cout << "\taverageHeartRate: " << activity.average_heart_rate() << " bpm" << std::endl;
         std::cout << "\tmaxHeartRate: " << activity.max_heart_rate() << " bpm" << std::endl;

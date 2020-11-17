@@ -41,6 +41,12 @@ std::chrono::system_clock::duration Activity::duration() const
     return std::chrono::seconds(_activity.duration());
 }
 
+std::chrono::system_clock::duration Activity::movingTime() const
+{
+    return std::chrono::seconds(_activity.moving_time());
+}
+
+
 float Activity::totalDistance() const
 {
     return _activity.total_distance();
@@ -59,6 +65,18 @@ float Activity::totalDescent() const
 float Activity::average_speed() const
 {
     auto duration_ns = std::chrono::duration<float>(duration());
+    auto duration_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration_ns).count();
+    if (duration_seconds == 0)
+    {
+        return 0;
+    }
+
+    return totalDistance() / duration_seconds;
+}
+
+float Activity::moving_average_speed() const
+{
+    auto duration_ns = std::chrono::duration<float>(movingTime());
     auto duration_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration_ns).count();
     if (duration_seconds == 0)
     {

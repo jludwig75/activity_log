@@ -22,6 +22,7 @@ message Activity {
     uint32 max_heart_rate = 10;
     float average_climbing_grade = 11;
     float average_descending_grade = 12;
+    uint64 moving_time = 13;
 };
 
 message ActivityFileChunk {
