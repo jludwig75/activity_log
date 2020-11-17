@@ -23,7 +23,7 @@ grpc::Status ActivityLog::uploadActivity(const std::string& activityFileName, Ac
 {
     ClientContext context;
 
-    Container<threadfile::FileChunk> fileChunks;
+    InterThreadQueue<threadfile::FileChunk> fileChunks;
     bool readerSuccess = false;
     std::thread reader([activityFileName, &fileChunks, &readerSuccess]{
         readerSuccess = threadfile::readFile(activityFileName, activity_log::ActivityFileChunk::Limits::ActivityFileChunk_Limits_MAX_CHUNK_SIZE, fileChunks);

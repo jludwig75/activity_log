@@ -110,7 +110,7 @@ void FileChunk::setSize(size_t size)
     _size = size;
 }
 
-bool readFile(const std::string& fileName, size_t maxChunkSize, Container<FileChunk>& stream)
+bool readFile(const std::string& fileName, size_t maxChunkSize, InterThreadQueue<FileChunk>& stream)
 {
     auto fd = open(fileName.c_str(), O_RDONLY);
     if (fd < 0)
@@ -142,7 +142,7 @@ bool readFile(const std::string& fileName, size_t maxChunkSize, Container<FileCh
     return true;
 }
 
-bool writeFile(const std::string& fileName, Container<FileChunk>& stream)
+bool writeFile(const std::string& fileName, InterThreadQueue<FileChunk>& stream)
 {
     auto fd = open(fileName.c_str(), O_CREAT | O_WRONLY, DEFFILEMODE);
     if (fd < 0)

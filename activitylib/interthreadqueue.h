@@ -6,23 +6,25 @@
 #include <mutex>
 
 template<typename DataType>
-class Container
+class InterThreadQueue
 {
 public:
-    Container()
+    InterThreadQueue()
         :
         _done_pushing(false)
     {
     }
 
-    Container(const Container& other) = delete;
-    Container& operator=(const Container& other) = delete;
+    InterThreadQueue(const InterThreadQueue& other) = delete;
+    InterThreadQueue& operator=(const InterThreadQueue& other) = delete;
 
-    // TODO: We can support a move operatore, but I think the synchronization
-    // members might need to be copied to a unique_ptr managed struct oe moved
-    // with std::move.
-    Container(Container&& other) = delete;
-    Container& operator=(Container&& other) = delete;
+    // I don't think this class should be moveable. std::mutex is not.
+    // I think it would be a big problem if the queue got moved in one thread
+    // but not another.
+    // This seems inherently bad for an object that is shared between multiple
+    // clients.
+    InterThreadQueue(InterThreadQueue&& other) = delete;
+    InterThreadQueue& operator=(InterThreadQueue&& other) = delete;
 
     bool pop(DataType& data)
     {

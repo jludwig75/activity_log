@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <string>
 
-#include "container.h"
+#include "interthreadqueue.h"
 
 
 namespace threadfile
@@ -32,8 +32,8 @@ private:
 };
 
 
-bool readFile(const std::string& fileName, size_t maxChunkSize, Container<FileChunk>& stream);
-bool writeFile(const std::string& fileName, Container<FileChunk>& stream);
+bool readFile(const std::string& fileName, size_t maxChunkSize, InterThreadQueue<FileChunk>& stream);
+bool writeFile(const std::string& fileName, InterThreadQueue<FileChunk>& stream);
 
 
 } // namespace threadfile

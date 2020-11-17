@@ -3,7 +3,7 @@
 #include <string>
 
 #include "activity.h"
-#include "container.h"
+#include "interthreadqueue.h"
 
 
 namespace gpxfile

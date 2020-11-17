@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     Parser parser;
 
     auto fileName = args[0];
-    Container<threadfile::FileChunk> chunks;
+    InterThreadQueue<threadfile::FileChunk> chunks;
     bool readerSuccess = false;
     std::thread reader([fileName, &chunks, &readerSuccess]{
         readerSuccess = threadfile::readFile(fileName, 64 * 1024, chunks);
