@@ -1,7 +1,19 @@
 add_executable(activity
                activity_cli.cpp
                activity.cpp
-               activity_log.cpp)
+               activity_log.cpp
+               grpcinit.cpp
+               cmd.cpp
+               cmd_delete.cpp
+               cmd_deleteall.cpp
+               cmd_download.cpp
+               cmd_edit.cpp
+               cmd_get.cpp
+               cmd_list.cpp
+               cmd_plot.cpp
+               cmd_stats.cpp
+               cmd_track.cpp
+               cmd_upload.cpp)
 
 target_link_libraries(activity
                       activity_proto
