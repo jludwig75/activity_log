@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <boost/asio/thread_pool.hpp>
+#include <boost/asio/post.hpp>
+
 #include "activity_log.h"
 
 
@@ -15,30 +18,43 @@ int UploadCommandHandler::runCommand(const std::vector<std::string>& args)
 {
     auto activityLog = createActivityLog();
 
-    Activity newActivity;
-    if (!activityLog->uploadActivity(args[0], newActivity).ok())
+    boost::asio::thread_pool threadPool(6);
+
+    for (const auto& fileName: args)
     {
-        std::cout << "Failed to upload activity \"" << args[0] << "\"\n";
-        return -1;
+        boost::asio::post(threadPool, [activityLog, fileName]{
+            Activity newActivity;
+            if (!activityLog->uploadActivity(fileName, newActivity).ok())
+            {
+                std::cout << "Failed to upload activity \"" << fileName << "\"\n";
+                return -1;
+            }
+
+            std::cout << "Successfully uploaded activity file \"" << fileName << "\" as activity " << newActivity.id() + "\n";
+            return 0;
+        });
     }
 
-    std::cout << "Successfully uploaded activity file \"" << args[0] << "\" as activity " << newActivity.id() + "\n";
+    threadPool.join();
 
     return 0;
 }
+
 std::string UploadCommandHandler::syntax() const
 {
     return UploadCommandHandler::name() + " <activity_file_name>";
 }
+
 std::string UploadCommandHandler::description() const
 {
     return "uploads an activity file (currently only supports gpx)";
 }
-size_t UploadCommandHandler::minNumberOfArgs() const
+
+int UploadCommandHandler::minNumberOfArgs() const
 {
     return 1;
 }
-size_t UploadCommandHandler::maxNumberOfArgs() const
+int UploadCommandHandler::maxNumberOfArgs() const
 {
-    return 1;
+    return -11;
 }

@@ -53,12 +53,12 @@ std::string TrackCommandHandler::description() const
     return "retreive activity track points in CSV format";
 }
 
-size_t TrackCommandHandler::minNumberOfArgs() const
+int TrackCommandHandler::minNumberOfArgs() const
 {
     return 1;
 }
 
-size_t TrackCommandHandler::maxNumberOfArgs() const
+int TrackCommandHandler::maxNumberOfArgs() const
 {
     return 1;
 }

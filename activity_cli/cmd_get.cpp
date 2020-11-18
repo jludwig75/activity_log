@@ -44,19 +44,23 @@ int GetCommandHandler::runCommand(const std::vector<std::string>& args)
 
     return 0;
 }
+
 std::string GetCommandHandler::syntax() const
 {
     return name() + " <activity_id>";
 }
+
 std::string GetCommandHandler::description() const
 {
     return "retrieves activity details";
 }
-size_t GetCommandHandler::minNumberOfArgs() const
+
+int GetCommandHandler::minNumberOfArgs() const
 {
     return 1;
 }
-size_t GetCommandHandler::maxNumberOfArgs() const
+
+int GetCommandHandler::maxNumberOfArgs() const
 {
     return 1;
 }
