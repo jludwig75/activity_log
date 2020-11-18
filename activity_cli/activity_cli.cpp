@@ -8,6 +8,7 @@
 #include "cmd_delete.h"
 #include "cmd_deleteall.h"
 #include "cmd_download.h"
+#include "cmd_downloadall.h"
 #include "cmd_edit.h"
 #include "cmd_get.h"
 #include "cmd_list.h"
@@ -89,6 +90,7 @@ private:
         { "delete", std::make_shared<DeleteCommandHandler>("delete") },
         { "deleteall", std::make_shared<DeleteAllCommandHandler>("deleteall") },
         { "download", std::make_shared<DownloadCommandHandler>("download") },
+        { "downloadall", std::make_shared<DownloadAllCommandHandler>("downloadall") },
         { "edit", std::make_shared<EditCommandHandler>("edit") },
         { "get", std::make_shared<GetCommandHandler>("get") },
         { "list", std::make_shared<ListCommandHandler>("list") },
