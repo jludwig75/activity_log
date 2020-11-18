@@ -32,7 +32,6 @@ grpc::Status ActivityLog::uploadActivity(grpc::ServerContext* context,
         // TODO: Maybe add the time or time of day to the name
         newActivity.name = "New Activity";
     }
-    newActivity.analyzeTrackPoints();
 
     if (!_db.storeActivity(newActivity, newActivity.id))
     {
@@ -298,7 +297,7 @@ void ActivityLog::toProto(const Activity& activity, activity_log::Activity* prot
     // max_speed
     protoActivity->set_max_speed(activity.stats.max_speed);
     // average_heart_rate
-    protoActivity->set_average_heart_rate(activity.stats.average_heart_rate);
+    protoActivity->set_average_heart_rate(static_cast<uint32_t>(activity.stats.average_heart_rate));
     // max_heart_rate
     protoActivity->set_max_heart_rate(activity.stats.max_heart_rate);
     // average_climbing_grade

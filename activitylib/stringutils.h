@@ -21,3 +21,13 @@ std::string floatToString(T t, size_t precision)
 
     return ss.str();
 }
+
+static inline bool endsWith(const std::string& str, const std::string& ending)
+{
+    if (str.length() <  ending.length())
+    {
+        return false;
+    }
+
+    return str.substr(str.length() - ending.length()) == ending;
+}

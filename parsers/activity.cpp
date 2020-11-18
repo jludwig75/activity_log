@@ -3,6 +3,36 @@
 #include <cassert>
 
 
+bool Activity::operator==(const Activity& other) const
+{
+    if (name != other.name || start_time != other.start_time || stats != other.stats)
+    {
+        return false;
+    }
+
+    if (trackPoints.size() != other.trackPoints.size())
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < trackPoints.size(); ++i)
+    {
+        if (trackPoints[i] != other.trackPoints[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Activity::operator!=(const Activity& other) const
+{
+    return !operator==(other);
+}
+
+
+
 std::chrono::system_clock::duration Activity::duration() const
 {
     if (trackPoints.empty())
@@ -14,13 +44,19 @@ std::chrono::system_clock::duration Activity::duration() const
 
 void Activity::analyzeTrackPoints()
 {
+    if (trackPoints.empty())
+    {
+        return;
+    }
+
     stats = {};
     TrackPoint previous;
     unsigned intervalCount = 0;
 
+    auto activityStartTime = trackPoints.front().time;
     for (const auto& trackPoint : trackPoints)
     {
-        if (trackPoint.time > trackPoints.front().time)
+        if (trackPoint.time > activityStartTime)
         {
             intervalCount++;
             assert(trackPoint.time >= previous.time);
@@ -67,14 +103,22 @@ void Activity::analyzeTrackPoints()
 
 
             // average heart rate
-            // cast to uint64_t for calculation to prevent overflow.
-            stats.average_heart_rate = static_cast<uint32_t>((static_cast<uint64_t>(stats.average_heart_rate) * (intervalCount - 1) + trackPoint.heartRate) / intervalCount);
+            // average over time
+            auto previousRelativeStart = (previous.time -  activityStartTime).count();          // current average time span
+            auto trackPointRelativeStart = (trackPoint.time - activityStartTime).count();       // new average time span
+            auto trackPointDuration = (trackPoint.time - previous.time).count();                // duration of current track point
+            double averageTrackPointHeartRate = (static_cast<double>(previous.heartRate) + trackPoint.heartRate) / 2.0;  // average over current trackpoint 
+            stats.average_heart_rate = (stats.average_heart_rate * previousRelativeStart + averageTrackPointHeartRate * trackPointDuration) / trackPointRelativeStart;
 
             // max HR
             if (trackPoint.heartRate > stats.max_heart_rate)
             {
                 stats.max_heart_rate = trackPoint.heartRate;
             }
+        }
+        else if (trackPoint.time ==  activityStartTime)
+        {
+            stats.average_heart_rate = trackPoint.heartRate;
         }
 
         previous = trackPoint;

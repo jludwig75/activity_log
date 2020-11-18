@@ -159,14 +159,35 @@ bool parseFileData(const std::string& fileData, Activity& activity)
 
                 trackPoint.startOfSegement = startOfSegment;
 
-                // TODO: Add heart rate to GPX file parsing/generation
-                trackPoint.heartRate = 0;
-
                 startOfSegment = false;
+
+                trackPoint.heartRate = 0;
+                auto extensionsElement = trkptElement.child("extensions");
+                if (extensionsElement)
+                {
+                    for (const auto& childElement: extensionsElement.children())
+                    {
+                        if (endsWith(childElement.name(), "TrackPointExtension"))
+                        {
+                            for (const auto& grandChildElement: childElement.children())
+                            {
+                                if (endsWith(grandChildElement.name(), "hr"))
+                                {
+                                    trackPoint.heartRate = grandChildElement.text().as_uint();
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+
                 stream.push_back(std::move(trackPoint));
             }
         }
     }
+
+    activity.analyzeTrackPoints();
 
     return true;
 }
@@ -177,6 +198,20 @@ bool generateFileData(const Activity& activity, std::string& fileData)
     if (stream.empty())
     {
         return false;
+    }
+
+    // 99.99..% of the time the first track point will have a non-zero heart
+    // rate, if the activity has heart rate data. When it doesn't, this loop
+    // runs longer. TODO: Maybe only look at the first few, the middle and the
+    // end until we determine there is no heart rate data?
+    bool hasHeartRateData = false;
+    for (const auto& trackPoint: stream)
+    {
+        if (trackPoint.heartRate != 0)
+        {
+            hasHeartRateData = true;
+            break;
+        }
     }
 
     pugi::xml_document doc;
@@ -193,11 +228,24 @@ bool generateFileData(const Activity& activity, std::string& fileData)
     // xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     gpxElement.append_attribute("xmlns:xsi").set_value("http://www.w3.org/2001/XMLSchema-instance");
     // xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
-    gpxElement.append_attribute("xsi:schemaLocation").set_value("http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd");
+    std::string schemaLocation = "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd";
+    if (hasHeartRateData)
+    {
+        schemaLocation += " http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd";
+    }
+    gpxElement.append_attribute("xsi:schemaLocation").set_value(schemaLocation.c_str());
     // version="1.1"
     gpxElement.append_attribute("version").set_value("1.1");
     // xmlns="http://www.topografix.com/GPX/1/1"
     gpxElement.append_attribute("xmlns").set_value("http://www.topografix.com/GPX/1/1");
+
+    if (hasHeartRateData)
+    {
+        // xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+        gpxElement.append_attribute("xmlns:gpxtpx").set_value("http://www.garmin.com/xmlschemas/TrackPointExtension/v1");
+        // xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3"        
+        gpxElement.append_attribute("xmlns:gpxx").set_value("http://www.garmin.com/xmlschemas/GpxExtensions/v3");
+    }
 
     {
         auto metadataElement = gpxElement.append_child();
@@ -238,6 +286,11 @@ bool generateFileData(const Activity& activity, std::string& fileData)
         trkptElement.append_attribute("lon").set_value(floatToString(trackPoint.longitude, 7).c_str());
         trkptElement.append_child("ele").text().set(floatToString(trackPoint.altitude, 1).c_str());
         trkptElement.append_child("time").text().set(internal::toTimeString(std::chrono::system_clock::to_time_t(trackPoint.time)).c_str());
+
+        if (hasHeartRateData)
+        {
+            trkptElement.append_child("extensions").append_child("gpxtpx:TrackPointExtension").append_child("gpxtpx:hr").text().set(std::to_string(trackPoint.heartRate).c_str());
+        }
     }
 
     std::stringstream ss;

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from gpxparser import parseGpxFile
+import json
 import sys
 
 
@@ -86,7 +87,7 @@ def validateGpxTrack(gpxFileName, trackPoints):
 
 if __name__ == "__main__":
     gpxFileName = sys.argv[1]
-    activity = _parseGpxFile(gpxFileName)
+    activity = parseGpxFile(gpxFileName)
     if activity == None:
         print('Failed to parse GPX file "%s"' % gpxFileName)
     print(json.dumps(activity.map))

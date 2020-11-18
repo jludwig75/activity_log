@@ -99,19 +99,5 @@ TEST_CASE("Generate GPX File", "")
     Activity reparsedActivity;
     REQUIRE(parser.parseActivityData(gpxFileData, reparsedActivity));
 
-    REQUIRE(activity.name == reparsedActivity.name);
-    REQUIRE(activity.start_time == reparsedActivity.start_time);
-    REQUIRE(activity.stats == reparsedActivity.stats);
-    REQUIRE(activity.trackPoints.size() == reparsedActivity.trackPoints.size());
-
-    for (size_t i = 0; i < activity.trackPoints.size(); ++i)
-    {
-        const auto& trackPoint = activity.trackPoints[i];
-        const auto& reparsedTrackPoint = reparsedActivity.trackPoints[i];
-        REQUIRE(trackPoint.time == reparsedTrackPoint.time);
-        REQUIRE(trackPoint.latitude == reparsedTrackPoint.latitude);
-        REQUIRE(trackPoint.longitude == reparsedTrackPoint.longitude);
-        REQUIRE(trackPoint.altitude == reparsedTrackPoint.altitude);
-        REQUIRE(trackPoint.heartRate == reparsedTrackPoint.heartRate);
-    }
+    REQUIRE(activity == reparsedActivity);
 }

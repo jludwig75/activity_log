@@ -97,7 +97,7 @@ class ActivityLogSystemTest(unittest.TestCase):
     def test_download(self):
         activityLog = self.activityLog
 
-        GPX_FILE_NAME = "../../Big_CC_Loop.gpx"
+        GPX_FILE_NAME = "../../Finding_My_Inner_Mountain_Goat.gpx"
         activity = activityLog.uploadActivity(GPX_FILE_NAME)
         OUTPUT_GPX_FILE_NAME = 'delme_py1.gpx'
         activity.download(OUTPUT_GPX_FILE_NAME)

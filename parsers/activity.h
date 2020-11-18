@@ -10,6 +10,10 @@
 class Activity
 {
 public:
+
+    bool operator==(const Activity& other) const;
+    bool operator!=(const Activity& other) const;
+
     void analyzeTrackPoints();
 
     std::string id;
@@ -19,7 +23,7 @@ public:
     std::vector<TrackPoint> trackPoints;
     struct ActivityStats
     {
-        bool operator==(const ActivityStats& other)
+        bool operator==(const ActivityStats& other) const
         {
             return total_distance == other.total_distance &&
                 total_ascent == other.total_ascent &&
@@ -31,11 +35,15 @@ public:
                 average_descending_grade == other.average_descending_grade &&
                 movingTime == other.movingTime;
         }
+        bool operator!=(const ActivityStats& other) const
+        {
+            return !operator==(other);
+        }
         float total_distance;
         float total_ascent;
         float total_descent;
         float max_speed;
-        uint32_t average_heart_rate;
+        double average_heart_rate;
         uint32_t max_heart_rate;
         double average_climbing_grade;
         double average_descending_grade;

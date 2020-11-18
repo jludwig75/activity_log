@@ -6,11 +6,13 @@ add_executable(activity_server
                activity_db.cpp
                activity_log.cpp)
 
-target_include_directories(activity_server 
-                PRIVATE ${LIBMONGOCXX_INCLUDE_DIRS})   
+target_include_directories(activity_server
+                PRIVATE ${LIBMONGOCXX_INCLUDE_DIRS})
 
 target_link_libraries(activity_server
                       activity_proto
                       activitylib
                       parser
                       ${LIBMONGOCXX_LIBRARIES})
+
+add_subdirectory(test)

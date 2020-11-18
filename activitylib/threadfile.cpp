@@ -144,7 +144,7 @@ bool readFile(const std::string& fileName, size_t maxChunkSize, InterThreadQueue
 
 bool writeFile(const std::string& fileName, InterThreadQueue<FileChunk>& stream)
 {
-    auto fd = open(fileName.c_str(), O_CREAT | O_WRONLY, DEFFILEMODE);
+    auto fd = open(fileName.c_str(), O_CREAT | O_TRUNC | O_WRONLY, DEFFILEMODE);
     if (fd < 0)
     {
         return false;

@@ -23,6 +23,19 @@ public:
         startOfSegement(startOfSegement)
     {
     }
+    bool operator==(const TrackPoint& other) const
+    {
+        return time == other.time &&
+                latitude == other.latitude &&
+                longitude == other.longitude &&
+                altitude == other.altitude &&
+                heartRate == other.heartRate &&
+                startOfSegement == other.startOfSegement;
+    }
+    bool operator!=(const TrackPoint& other) const
+    {
+        return !operator==(other);
+    }
     std::chrono::system_clock::time_point time;
     double latitude;
     double longitude;
