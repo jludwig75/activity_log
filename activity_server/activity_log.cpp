@@ -50,7 +50,7 @@ grpc::Status ActivityLog::getActivityList(grpc::ServerContext* context,
 {
     ActivityDatabase::ActivityMap activities;
     // TODO: Add support for filtering by timespan
-    if (!_db.listActivities(activities))
+    if (!_db.listActivities(activities, false))
     {
         return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity map");
     }
