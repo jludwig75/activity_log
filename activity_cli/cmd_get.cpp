@@ -1,5 +1,7 @@
 #include "cmd_get.h"
 
+#include <boost/format.hpp>
+
 #include "activity_log.h"
 #include "units.h"
 
@@ -23,22 +25,22 @@ int GetCommandHandler::runCommand(const std::vector<std::string>& args)
     }
 
     std::cout << "Activity " << activity.id() << std::endl;
-    std::cout << "\tname: " << activity.name() << std::endl;
+    std::cout << boost::format("\tname: %1%\n") % activity.name();
     // TODO: Make human readable
-    std::cout << "\tstartTime: " << std::chrono::system_clock::to_time_t(activity.startTime()) << std::endl;
+    std::cout << boost::format("\tstartTime: %1%\n") % std::chrono::system_clock::to_time_t(activity.startTime());
     // TODO: Show as HMS
-    std::cout << "\tduration: " << std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count() << std::endl;
-    std::cout << "\tmovingTime: " << std::chrono::duration_cast<std::chrono::seconds>(activity.movingTime()).count() << std::endl;
-    std::cout << "\ttotalDistance: " << m_to_miles(activity.totalDistance()) << " miles" << std::endl;
-    std::cout << "\ttotalAscent: " << m_to_ft(activity.totalAscent()) << " feet" << std::endl;
-    std::cout << "\ttotalDescent: " << m_to_ft(activity.totalDescent()) << " feet" << std::endl;
-    std::cout << "\taverageSpeed: " << mps_to_mph(activity.average_speed()) << " mph" << std::endl;
-    std::cout << "\tmovingAverageSpeed: " << mps_to_mph(activity.moving_average_speed()) << " mph" << std::endl;
-    std::cout << "\tmaxSpeed: " << mps_to_mph(activity.max_speed()) << " mph" << std::endl;
-    std::cout << "\taverageHeartRate: " << activity.average_heart_rate() << " bpm" << std::endl;
-    std::cout << "\tmaxHeartRate: " << activity.max_heart_rate() << " bpm" << std::endl;
-    std::cout << "\taverageClimbingGrade: " << 100.0 * activity.average_climbing_grade() << "%" << std::endl;
-    std::cout << "\taverageDescendingGrade: " << 100.0 * activity.average_descending_grade() << "%" << std::endl;
+    std::cout << boost::format("\tduration: %1%\n") % std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count();
+    std::cout << boost::format("\tmovingTime: %1%\n") % std::chrono::duration_cast<std::chrono::seconds>(activity.movingTime()).count();
+    std::cout << boost::format("\ttotalDistance: %1% miles\n") % m_to_miles(activity.totalDistance());
+    std::cout << boost::format("\ttotalAscent: %1%\n") %m_to_ft(activity.totalAscent());
+    std::cout << boost::format("\ttotalDescent: %1% feet\n") % m_to_ft(activity.totalDescent());
+    std::cout << boost::format("\taverageSpeed: %1% mph\n") % mps_to_mph(activity.average_speed());
+    std::cout << boost::format("\tmovingAverageSpeed: %1% mph\n") % mps_to_mph(activity.moving_average_speed());
+    std::cout << boost::format("\tmaxSpeed: %1% mph\n") % mps_to_mph(activity.max_speed());
+    std::cout << boost::format("\taverageHeartRate: %1% bpm\n") % activity.average_heart_rate();
+    std::cout << boost::format("\tmaxHeartRate: %1% bpm\n") % activity.max_heart_rate();
+    std::cout << boost::format("\taverageClimbingGrade: %1%%%\n") % (100.0 * activity.average_climbing_grade());
+    std::cout << boost::format("\taverageDescendingGrade: %1%%%\n") % (100.0 * activity.average_descending_grade());
 
     return 0;
 }

@@ -1,5 +1,7 @@
 #include "cmd_list.h"
 
+#include <boost/format.hpp>
+
 #include "activity_log.h"
 #include "units.h"
 
@@ -21,10 +23,10 @@ int ListCommandHandler::runCommand(const std::vector<std::string>& args)
         return -1;
     }
 
-    std::cout << "Retrieved " << std::to_string(activities.size()) << " activities:\n";
+    std::cout << boost::format("Retrieved %1% activities:\n") % activities.size();
     for (const auto& activity : activities)
     {
-        std::cout << "\t" <<  activity.id() << " - \"" << activity.name() << "\": " << m_to_miles(activity.totalDistance()) << " miles, " << m_to_ft(activity.totalAscent()) << " feet ascent\n";
+        std::cout << boost::format("\t%1% - \"%2%\": %3% miles, %4% feet ascent\n") % activity.id() % activity.name() % m_to_miles(activity.totalDistance()) % m_to_ft(activity.totalAscent());
     }
 
     return 0;

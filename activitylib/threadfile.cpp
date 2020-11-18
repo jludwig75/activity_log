@@ -1,12 +1,13 @@
 #include "threadfile.h"
 
+#include <boost/scope_exit.hpp>
+
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "scopeguard.h"
 
 namespace threadfile
 {
@@ -117,10 +118,10 @@ bool readFile(const std::string& fileName, size_t maxChunkSize, InterThreadQueue
     {
         return false;
     }
-    ON_EXIT(([fd, &stream]{
+    BOOST_SCOPE_EXIT_ALL(&) {
         close(fd);
         stream.done_pushing();
-    }));
+    };
 
     while (true)
     {
@@ -149,7 +150,9 @@ bool writeFile(const std::string& fileName, InterThreadQueue<FileChunk>& stream)
     {
         return false;
     }
-    ON_EXIT([fd]{ close(fd); });
+    BOOST_SCOPE_EXIT_ALL(&) {
+        close(fd);
+    };
 
     threadfile::FileChunk chunk;
     while (stream.pop(chunk))
