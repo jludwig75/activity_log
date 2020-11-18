@@ -1,8 +1,6 @@
 #include "cmd_edit.h"
 
-#include "grpcinit.h"
-
-#include "units.h"
+#include "activity_log.h"
 
 
 EditCommandHandler::EditCommandHandler(const std::string& name)

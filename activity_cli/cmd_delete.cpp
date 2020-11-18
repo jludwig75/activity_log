@@ -1,6 +1,6 @@
 #include "cmd_delete.h"
 
-#include "grpcinit.h"
+#include "activity_log.h"
 
 
 DeleteCommandHandler::DeleteCommandHandler(const std::string& name)

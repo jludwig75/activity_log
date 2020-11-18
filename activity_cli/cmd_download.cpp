@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "grpcinit.h"
+#include "activity_log.h"
 
 
 DownloadCommandHandler::DownloadCommandHandler(const std::string& name)

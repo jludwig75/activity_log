@@ -2,12 +2,10 @@ add_library(parser STATIC
             parser.cpp
             gpxfile.cpp
             gpxparser.cpp
-            activity.cpp
-            track_point.cpp
             file_utils.cpp)
 
 target_link_libraries(parser
-                      activitylib
+                      activity
                       pugixml)
 
 set_target_properties(parser PROPERTIES

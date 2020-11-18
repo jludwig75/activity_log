@@ -85,16 +85,26 @@ bsoncxx::document::value makeActivityId(const std::string& activityId)
 
 }
 
+class DbWrapper
+{
+public:
+    DbWrapper()
+        :
+        client(mongocxx::uri{})
+    {
+    }
+    mongocxx::v_noabi::client client;
+};
+
 ActivityDatabase::ActivityDatabase()
 {
     mongocxx::instance instance{}; // This should be done only once.
-    _client = std::make_unique<mongocxx::client>(mongocxx::uri{});
-    mongocxx::client client{mongocxx::uri{}};
+    _wrapper = std::make_shared<DbWrapper>();
 }
 
 bool ActivityDatabase::storeActivity(const Activity& activity, std::string& activityId)
 {
-    mongocxx::database db = (*_client)["activity_log"];
+    mongocxx::database db = _wrapper->client["activity_log"];
 
     auto result = db["activities"].insert_one(serializeActivity(activity));
     if (!result)
@@ -109,7 +119,7 @@ bool ActivityDatabase::storeActivity(const Activity& activity, std::string& acti
 
 bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& activity) const
 {
-    mongocxx::database db = (*_client)["activity_log"];
+    mongocxx::database db = _wrapper->client["activity_log"];
 
     auto result = db["activities"].find_one(makeActivityId(activityId));
     if(!result)
@@ -128,7 +138,7 @@ bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& act
 
 bool ActivityDatabase::listActivities(ActivityMap& activities) const
 {
-    mongocxx::database db = (*_client)["activity_log"];
+    mongocxx::database db = _wrapper->client["activity_log"];
     
     auto cursor = db["activities"].find({});
     std::vector<bsoncxx::document::view> activitiesView{cursor.begin(), cursor.end()};
@@ -148,7 +158,7 @@ bool ActivityDatabase::listActivities(ActivityMap& activities) const
 
 bool ActivityDatabase::updateActivity(const std::string& activityId, const Activity& activity)
 {
-    mongocxx::database db = (*_client)["activity_log"];
+    mongocxx::database db = _wrapper->client["activity_log"];
 
     db["activities"].replace_one(makeActivityId(activityId), serializeActivity(activity));
 
@@ -157,7 +167,7 @@ bool ActivityDatabase::updateActivity(const std::string& activityId, const Activ
 
 bool ActivityDatabase::deleteActivity(const std::string& activityId)
 {
-    mongocxx::database db = (*_client)["activity_log"];
+    mongocxx::database db = _wrapper->client["activity_log"];
 
     db["activities"].delete_one(makeActivityId(activityId));
 

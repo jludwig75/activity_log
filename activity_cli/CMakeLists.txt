@@ -1,8 +1,7 @@
-add_executable(activity
+add_executable(activities
                activity_cli.cpp
                activity.cpp
                activity_log.cpp
-               grpcinit.cpp
                cmd.cpp
                cmd_delete.cpp
                cmd_deleteall.cpp
@@ -15,6 +14,6 @@ add_executable(activity
                cmd_track.cpp
                cmd_upload.cpp)
 
-target_link_libraries(activity
+target_link_libraries(activities
                       activity_proto
                       activitylib)

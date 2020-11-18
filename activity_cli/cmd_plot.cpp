@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "cmdutils.h"
-#include "grpcinit.h"
+#include "activity_log.h"
 
 
 PlotCommandHandler::PlotCommandHandler(const std::string& name)

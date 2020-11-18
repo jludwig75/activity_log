@@ -47,9 +47,16 @@ endif()
 
 add_subdirectory(pugixml)
 add_subdirectory(catch2)
+
 add_subdirectory(activity_proto)
 add_subdirectory(activitylib)
+
 add_subdirectory(activity_cli)
+
+add_subdirectory(activity)
+add_subdirectory(activitydb)
 add_subdirectory(parsers)
+
 add_subdirectory(activity_server)
+
 add_subdirectory(system_tests)

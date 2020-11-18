@@ -1,8 +1,7 @@
 #include "cmd_track.h"
 
 #include "cmdutils.h"
-#include "grpcinit.h"
-#include "units.h"
+#include "activity_log.h"
 
 
 TrackCommandHandler::TrackCommandHandler(const std::string& name)

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "grpcinit.h"
+#include "activity_log.h"
 
 
 UploadCommandHandler::UploadCommandHandler(const std::string& name)

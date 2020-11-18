@@ -27,3 +27,5 @@ public:
 private:
     std::shared_ptr<activity_log::ActivityLog::Stub> _stub;
 };
+
+std::shared_ptr<ActivityLog> createActivityLog();

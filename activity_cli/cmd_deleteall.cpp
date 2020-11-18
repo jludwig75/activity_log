@@ -1,6 +1,6 @@
 #include "cmd_deleteall.h"
 
-#include "grpcinit.h"
+#include "activity_log.h"
 
 
 DeleteAllCommandHandler::DeleteAllCommandHandler(const std::string& name)

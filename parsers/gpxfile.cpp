@@ -1,11 +1,10 @@
 #include "gpxfile.h"
 
+#include <cassert>
 #include <iomanip>
 
 #include "pugixml.hpp"
-#include "scopeguard.h"
 #include "stringutils.h"
-#include "file_utils.h"
 
 
 namespace gpxfile

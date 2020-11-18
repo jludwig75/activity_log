@@ -11,7 +11,7 @@ LIST_CMD_EMTRY_RE = re.compile(r'\s+(\w+) \- "(.*)"\: ([0-9]*\.?[0-9]+) miles, (
 UPLOAD_CMD_RE = re.compile(r'Successfully uploaded activity file ".*" as activity (\w+)')
 
 def runCmd(cmd):
-    cmd = '../bin/activity ' + cmd
+    cmd = '../bin/activities ' + cmd
     return subprocess.check_output(cmd.split()).decode("utf-8")
 
 class Activity:

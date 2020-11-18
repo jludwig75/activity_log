@@ -5,13 +5,21 @@
 #include <thread>
 
 #include <grpcpp/client_context.h>
-
+#include <grpcpp/channel.h>
+#include <grpcpp/create_channel.h>
+#include <grpcpp/security/credentials.h>
 
 using grpc::ClientContext;
 using grpc::ClientWriter;
 using grpc::ClientReader;
 using grpc::Status;
 
+
+std::shared_ptr<ActivityLog> createActivityLog()
+{
+    auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
+    return std::make_shared<ActivityLog>(channel);    
+}
 
 ActivityLog::ActivityLog(std::shared_ptr<grpc::Channel> channel)
     :

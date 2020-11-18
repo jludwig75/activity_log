@@ -2,17 +2,13 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include "activity.h"
 
-#include <mongocxx/client.hpp>
-
 class Activity;
 
-// namespace mongocxx
-// {
-// class client;
-// }
+class DbWrapper;
 
 class ActivityDatabase
 {
@@ -33,5 +29,5 @@ public:
     bool deleteActivity(const std::string& activityId);
 
 private:
-    std::unique_ptr<mongocxx::client> _client;
+    std::shared_ptr<DbWrapper> _wrapper;
 };

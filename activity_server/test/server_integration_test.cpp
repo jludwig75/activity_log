@@ -2,37 +2,13 @@
 
 #include <thread>
 
-#include "../activity_db.h"
+#include "activity_db.h"
 #include "gpxfile.h"
 #include "parser.h"
 #include "file_utils.h"
+#include "fileutils.h"
 #include "threadfile.h"
 
-
-const size_t kTestFileChunkSize = 64 * 1024;
-
-bool readFile(const std::string& fileName, std::string& fileData)
-{
-    InterThreadQueue<threadfile::FileChunk> chunks;
-    bool readerSuccess = false;
-    std::thread reader([fileName, &chunks, &readerSuccess]{
-        readerSuccess = threadfile::readFile(fileName, kTestFileChunkSize, chunks);
-    });
-
-    threadfile::FileChunk chunk;
-    while (chunks.pop(chunk))
-    {
-        fileData += std::string(chunk.data(), chunk.data() + chunk.size());
-    }
-
-    reader.join();
-    if (!readerSuccess)
-    {
-        return false;
-    }
-
-    return true;
-}
 
 Parser parser;
 ActivityDatabase db;

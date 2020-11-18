@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-#include "interthreadqueue.h"
 #include "activity.h"
 
 class ActivityParser

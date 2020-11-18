@@ -1,7 +1,6 @@
 #include "cmd_get.h"
 
-#include "grpcinit.h"
-
+#include "activity_log.h"
 #include "units.h"
 
 
