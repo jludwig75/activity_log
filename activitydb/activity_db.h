@@ -19,8 +19,9 @@ public:
 
     // Retrieve
     bool loadActivity(const std::string& activityId, Activity& activity) const;
+
     using ActivityMap = std::map<std::string, Activity>;
-    bool listActivities(ActivityMap& activities) const;
+    bool listActivities(ActivityMap& activities, bool includeTrackPoints = true) const;
 
     // Update
     bool updateActivity(const std::string& activityId, const Activity& activity);

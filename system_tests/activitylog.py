@@ -6,7 +6,7 @@ import subprocess
 LIST_CMD_HEADER_RE = re.compile(r'Retrieved (\d+) activities\:')
 
 #   5fb330eca7180fe8947a8c63 - "Big CC Loop": 24.2352 miles, 3992.12 feet ascent
-LIST_CMD_EMTRY_RE = re.compile(r'\s+(\w+) \- "(.*)"\: ([0-9]*\.?[0-9]+) miles, ([0-9]*\.?[0-9]+) feet ascent')
+LIST_CMD_EMTRY_RE = re.compile(r'\s+(\w+) \- (\d+) "(.*)"')
 
 UPLOAD_CMD_RE = re.compile(r'Successfully uploaded activity file ".*" as activity (\w+)')
 
@@ -102,10 +102,9 @@ class ActivityLog:
         for line in lines[1:]:
             m = LIST_CMD_EMTRY_RE.match(line)
             if m != None:
-                id, name, distance, elevetion = m.groups()
+                id, startTime, name = m.groups()
                 activity = Activity(id, name)
-                activity.distance = float(distance)
-                activity.elevation = float(elevetion)
+                activity.startTime = startTime
                 activities.append(activity)
         return activities
 

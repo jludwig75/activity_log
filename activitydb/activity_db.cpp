@@ -144,12 +144,20 @@ bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& act
     return true;
 }
 
-bool ActivityDatabase::listActivities(ActivityMap& activities) const
+bool ActivityDatabase::listActivities(ActivityMap& activities, bool includeTrackPoints) const
 {
     std::scoped_lock lock(_wrapper->mutex);
     mongocxx::database db = _wrapper->client["activity_log"];
     
     mongocxx::options::find opts;
+    if (!includeTrackPoints)
+    {
+        opts.projection(bsoncxx::builder::stream::document{} <<
+                "_id" << 1  <<
+                "name" << 1  <<
+                "startTime" << 1 <<
+                bsoncxx::builder::stream::finalize);
+    }
     auto cursor = db["activities"].find({}, opts);
     
     for (auto iter = cursor.begin(); iter != cursor.end(); ++iter)

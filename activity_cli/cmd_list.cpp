@@ -1,3 +1,4 @@
+
 #include "cmd_list.h"
 
 #include <boost/format.hpp>
@@ -26,7 +27,8 @@ int ListCommandHandler::runCommand(const std::vector<std::string>& args)
     std::cout << boost::format("Retrieved %1% activities:\n") % activities.size();
     for (const auto& activity : activities)
     {
-        std::cout << boost::format("\t%1% - \"%2%\": %3% miles, %4% feet ascent\n") % activity.id() % activity.name() % m_to_miles(activity.totalDistance()) % m_to_ft(activity.totalAscent());
+        // TODO: Make time human-readable
+        std::cout << boost::format("\t%1% - %2% \"%3%\"\n") % activity.id() % std::chrono::system_clock::to_time_t(activity.startTime()) % activity.name();
     }
 
     return 0;
