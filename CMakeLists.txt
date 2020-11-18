@@ -10,7 +10,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 find_package(Threads REQUIRED)
 find_package(Catch2 REQUIRED)
-find_package(libmongocxx REQUIRED)
+#find_package(libmongocxx REQUIRED)
 #find_package(mongocxx REQUIRED)
 
 include(CTest)

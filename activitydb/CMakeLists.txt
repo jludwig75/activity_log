@@ -7,7 +7,7 @@ target_include_directories(activitydb
 target_link_libraries(activitydb
                       activity
                       activitylib
-                      ${LIBMONGOCXX_LIBRARIES})
+                      bsoncxx mongocxx)
 
 set_target_properties(activitydb PROPERTIES
                       INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}")

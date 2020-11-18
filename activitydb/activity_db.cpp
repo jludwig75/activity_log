@@ -1,5 +1,7 @@
 #include "activity_db.h"
 
+#include <mutex>
+
 #include <bsoncxx/json.hpp>
 #include <bsoncxx/stdx/string_view.hpp>
 #include <mongocxx/client.hpp>
@@ -31,18 +33,21 @@ bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activit
     activity.id = id;
     activity.name = name;
 
-    auto trackPoints = activityView["trackPoints"].get_array().value;
-    for (const auto& trackPointElement : trackPoints)
+    if (activityView["trackPoints"])
     {
-        TrackPoint trackPoint;
-        bsoncxx::document::view trackPointView = trackPointElement.get_document().value;
-        trackPoint.time = std::chrono::system_clock::from_time_t(trackPointView["time"].get_int64().value);
-        trackPoint.latitude = trackPointView["latitude"].get_double().value;
-        trackPoint.longitude = trackPointView["longitude"].get_double().value;
-        trackPoint.altitude = trackPointView["altitude"].get_double().value;
-        trackPoint.heartRate = trackPointView["heartRate"].get_int32().value;
-        trackPoint.startOfSegement = trackPointView["startOfSegement"].get_bool().value;
-        activity.trackPoints.push_back(std::move(trackPoint));
+        auto trackPoints = activityView["trackPoints"].get_array().value;
+        for (const auto& trackPointElement : trackPoints)
+        {
+            TrackPoint trackPoint;
+            bsoncxx::document::view trackPointView = trackPointElement.get_document().value;
+            trackPoint.time = std::chrono::system_clock::from_time_t(trackPointView["time"].get_int64().value);
+            trackPoint.latitude = trackPointView["latitude"].get_double().value;
+            trackPoint.longitude = trackPointView["longitude"].get_double().value;
+            trackPoint.altitude = trackPointView["altitude"].get_double().value;
+            trackPoint.heartRate = trackPointView["heartRate"].get_int32().value;
+            trackPoint.startOfSegement = trackPointView["startOfSegement"].get_bool().value;
+            activity.trackPoints.push_back(std::move(trackPoint));
+        }
     }
 
     activity.analyzeTrackPoints();
@@ -94,6 +99,7 @@ public:
     {
     }
     mongocxx::v_noabi::client client;
+    std::mutex mutex{};
 };
 
 ActivityDatabase::ActivityDatabase()
@@ -104,6 +110,7 @@ ActivityDatabase::ActivityDatabase()
 
 bool ActivityDatabase::storeActivity(const Activity& activity, std::string& activityId)
 {
+    std::scoped_lock lock(_wrapper->mutex);
     mongocxx::database db = _wrapper->client["activity_log"];
 
     auto result = db["activities"].insert_one(serializeActivity(activity));
@@ -119,6 +126,7 @@ bool ActivityDatabase::storeActivity(const Activity& activity, std::string& acti
 
 bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& activity) const
 {
+    std::scoped_lock lock(_wrapper->mutex);
     mongocxx::database db = _wrapper->client["activity_log"];
 
     auto result = db["activities"].find_one(makeActivityId(activityId));
@@ -138,13 +146,15 @@ bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& act
 
 bool ActivityDatabase::listActivities(ActivityMap& activities) const
 {
+    std::scoped_lock lock(_wrapper->mutex);
     mongocxx::database db = _wrapper->client["activity_log"];
     
-    auto cursor = db["activities"].find({});
-    std::vector<bsoncxx::document::view> activitiesView{cursor.begin(), cursor.end()};
-    for (std::size_t i = 0; i < activitiesView.size(); ++i)
+    mongocxx::options::find opts;
+    auto cursor = db["activities"].find({}, opts);
+    
+    for (auto iter = cursor.begin(); iter != cursor.end(); ++iter)
     {
-        auto activityView = activitiesView[i];
+        auto activityView = *iter;
         Activity activity;
         if (!desrializeActivity(activityView, activity))
         {
@@ -158,6 +168,7 @@ bool ActivityDatabase::listActivities(ActivityMap& activities) const
 
 bool ActivityDatabase::updateActivity(const std::string& activityId, const Activity& activity)
 {
+    std::scoped_lock lock(_wrapper->mutex);
     mongocxx::database db = _wrapper->client["activity_log"];
 
     db["activities"].replace_one(makeActivityId(activityId), serializeActivity(activity));
@@ -167,6 +178,7 @@ bool ActivityDatabase::updateActivity(const std::string& activityId, const Activ
 
 bool ActivityDatabase::deleteActivity(const std::string& activityId)
 {
+    std::scoped_lock lock(_wrapper->mutex);
     mongocxx::database db = _wrapper->client["activity_log"];
 
     db["activities"].delete_one(makeActivityId(activityId));
