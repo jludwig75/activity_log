@@ -6,6 +6,7 @@ add_executable(activities
                cmd_delete.cpp
                cmd_deleteall.cpp
                cmd_download.cpp
+               cmd_downloadall.cpp
                cmd_edit.cpp
                cmd_get.cpp
                cmd_list.cpp

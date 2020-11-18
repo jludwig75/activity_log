@@ -22,7 +22,7 @@ int UploadCommandHandler::runCommand(const std::vector<std::string>& args)
 
     for (const auto& fileName: args)
     {
-        boost::asio::post(threadPool, [activityLog, fileName]{
+        boost::asio::post(threadPool, [activityLog, fileName] {
             Activity newActivity;
             if (!activityLog->uploadActivity(fileName, newActivity).ok())
             {
