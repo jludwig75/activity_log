@@ -12,11 +12,11 @@ public:
     virtual int runCommand(const std::vector<std::string>& args) = 0;
     virtual std::string syntax() const = 0;
     virtual std::string description() const = 0;
-    virtual size_t minNumberOfArgs() const
+    virtual int minNumberOfArgs() const
     {
         return 0;
     }
-    virtual size_t maxNumberOfArgs() const
+    virtual int maxNumberOfArgs() const
     {
         return 0;
     }

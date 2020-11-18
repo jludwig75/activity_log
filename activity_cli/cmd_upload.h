@@ -11,6 +11,6 @@ public:
     int runCommand(const std::vector<std::string>& args);
     std::string syntax() const;
     std::string description() const;
-    size_t minNumberOfArgs() const override;
-    size_t maxNumberOfArgs() const override;
+    int minNumberOfArgs() const override;
+    int maxNumberOfArgs() const override;
 };

@@ -41,12 +41,12 @@ std::string EditCommandHandler::description() const
     return "Update the name of an activity";
 }
 
-size_t EditCommandHandler::minNumberOfArgs() const
+int EditCommandHandler::minNumberOfArgs() const
 {
     return 2;
 }
 
-size_t EditCommandHandler::maxNumberOfArgs() const
+int EditCommandHandler::maxNumberOfArgs() const
 {
     return 2;
 }

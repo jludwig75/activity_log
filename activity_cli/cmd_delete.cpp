@@ -40,12 +40,12 @@ std::string DeleteCommandHandler::description() const
     return "deletes and activity";
 }
 
-size_t DeleteCommandHandler::minNumberOfArgs() const
+int DeleteCommandHandler::minNumberOfArgs() const
 {
     return 1;
 }
 
-size_t DeleteCommandHandler::maxNumberOfArgs() const
+int DeleteCommandHandler::maxNumberOfArgs() const
 {
     return 1;
 }

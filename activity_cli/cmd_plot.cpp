@@ -58,12 +58,12 @@ std::string PlotCommandHandler::description() const
     return "plot sctivity data points to CSV format";
 }
 
-size_t PlotCommandHandler::minNumberOfArgs() const
+int PlotCommandHandler::minNumberOfArgs() const
 {
     return 1;
 }
 
-size_t PlotCommandHandler::maxNumberOfArgs() const
+int PlotCommandHandler::maxNumberOfArgs() const
 {
     return 1;
 }

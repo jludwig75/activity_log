@@ -36,12 +36,12 @@ std::string DownloadCommandHandler::description() const
     return "download activity GPX file";
 }
 
-size_t DownloadCommandHandler::minNumberOfArgs() const
+int DownloadCommandHandler::minNumberOfArgs() const
 {
     return 2;
 }
 
-size_t DownloadCommandHandler::maxNumberOfArgs() const
+int DownloadCommandHandler::maxNumberOfArgs() const
 {
     return 2;
 }

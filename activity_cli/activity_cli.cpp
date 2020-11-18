@@ -50,7 +50,7 @@ private:
         }
 
         auto command = commandEntry->second;
-        if (args.size() < command->minNumberOfArgs() || args.size() > command->maxNumberOfArgs())
+        if (args.size() < command->minNumberOfArgs() || (command->maxNumberOfArgs() != -1 && args.size() > command->maxNumberOfArgs()))
         {
             auto minArgs = command->minNumberOfArgs();
             auto maxArgs = command->maxNumberOfArgs();
