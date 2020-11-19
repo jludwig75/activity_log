@@ -48,14 +48,14 @@ grpc::Status ActivityLog::getActivityList(grpc::ServerContext* context,
                                 const activity_log::TimeSpan* timesSpan,
                                 grpc::ServerWriter<activity_log::Activity>* stream)
 {
-    ActivityDatabase::ActivityMap activities;
+    ActivityDatabase::ActivityList activities;
     // TODO: Add support for filtering by timespan
     if (!_db.listActivities(activities, false))
     {
         return grpc::Status(grpc::StatusCode::UNKNOWN, "Error getting activity map");
     }
 
-    for (auto& [activityId, activity]: activities)
+    for (const auto& activity: activities)
     {
         activity_log::Activity protoActivity;
         toProto(activity, &protoActivity);
@@ -72,7 +72,7 @@ grpc::Status ActivityLog::calculateStats(grpc::ServerContext* context,
                             const activity_log::TimeSpan* timesSpan,
                             activity_log::Stats* stats)
 {
-    ActivityDatabase::ActivityMap activities;
+    ActivityDatabase::ActivityList activities;
     // TODO: Add support for filtering by timespan
     if (!_db.listActivities(activities))
     {
@@ -83,7 +83,7 @@ grpc::Status ActivityLog::calculateStats(grpc::ServerContext* context,
     stats->set_total_time(0);
     stats->set_total_distance(0);
     stats->set_total_ascent(0);
-    for (auto& [activityId, activity]: activities)
+    for (const auto& activity: activities)
     {
         stats->set_total_activities(stats->total_activities() + 1);
         stats->set_total_time(stats->total_time() + std::chrono::duration_cast<std::chrono::seconds>(activity.stats.duration).count());

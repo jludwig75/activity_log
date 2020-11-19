@@ -155,7 +155,7 @@ bool ActivityDatabase::loadActivity(const std::string& activityId, Activity& act
     return true;
 }
 
-bool ActivityDatabase::listActivities(ActivityMap& activities, bool includeTrackPoints) const
+bool ActivityDatabase::listActivities(ActivityList& activities, bool includeTrackPoints) const
 {
     std::scoped_lock lock(_wrapper->mutex);
     mongocxx::database db = _wrapper->client["activity_log"];
@@ -174,6 +174,9 @@ bool ActivityDatabase::listActivities(ActivityMap& activities, bool includeTrack
                 "startLongitude" << 1 <<
                 bsoncxx::builder::stream::finalize);
     }
+    opts.sort(bsoncxx::builder::stream::document{} <<
+                "startTime" << 1 <<
+                bsoncxx::builder::stream::finalize);
     auto cursor = db["activities"].find({}, opts);
     
     for (auto iter = cursor.begin(); iter != cursor.end(); ++iter)
@@ -184,7 +187,7 @@ bool ActivityDatabase::listActivities(ActivityMap& activities, bool includeTrack
         {
             return false;
         }
-        activities[activity.id] = activity;
+        activities.push_back(std::move(activity));
     }
 
     return true;

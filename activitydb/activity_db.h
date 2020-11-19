@@ -1,8 +1,8 @@
 #pragma once
 
 #include <string>
-#include <map>
 #include <memory>
+#include <vector>
 
 #include "activity.h"
 
@@ -20,8 +20,8 @@ public:
     // Retrieve
     bool loadActivity(const std::string& activityId, Activity& activity) const;
 
-    using ActivityMap = std::map<std::string, Activity>;
-    bool listActivities(ActivityMap& activities, bool includeTrackPoints = true) const;
+    using ActivityList = std::vector<Activity>;
+    bool listActivities(ActivityList& activities, bool includeTrackPoints = true) const;
 
     // Update
     bool updateActivity(const std::string& activityId, const Activity& activity);
