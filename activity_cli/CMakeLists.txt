@@ -3,6 +3,7 @@ add_executable(activities
                activity.cpp
                activity_log.cpp
                cmd.cpp
+               cmdutils.cpp
                cmd_delete.cpp
                cmd_deleteall.cpp
                cmd_download.cpp

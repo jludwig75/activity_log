@@ -7,6 +7,7 @@
 #include <boost/format.hpp>
 
 #include "activity_log.h"
+#include "cmdutils.h"
 
 
 DownloadAllCommandHandler::DownloadAllCommandHandler(const std::string& name)
@@ -44,7 +45,7 @@ int DownloadAllCommandHandler::runCommand(const std::vector<std::string>& args)
         return -1;
     }
 
-    boost::asio::thread_pool threadPool(6);
+    boost::asio::thread_pool threadPool(commandThreadPoolCount());
 
     for (auto& activity : activities)
     {

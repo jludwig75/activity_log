@@ -6,6 +6,7 @@
 #include <boost/asio/post.hpp>
 
 #include "activity_log.h"
+#include "cmdutils.h"
 
 
 UploadCommandHandler::UploadCommandHandler(const std::string& name)
@@ -18,7 +19,7 @@ int UploadCommandHandler::runCommand(const std::vector<std::string>& args)
 {
     auto activityLog = createActivityLog();
 
-    boost::asio::thread_pool threadPool(6);
+    boost::asio::thread_pool threadPool(commandThreadPoolCount());
 
     for (const auto& fileName: args)
     {
