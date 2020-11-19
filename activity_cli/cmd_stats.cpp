@@ -1,6 +1,7 @@
 #include "cmd_stats.h"
 
 #include "activity_log.h"
+#include "datetime.h"
 #include "units.h"
 
 
@@ -23,7 +24,7 @@ int StatsCommandHandler::runCommand(const std::vector<std::string>& args)
 
     std::cout << "Cummulative activtiy stats:\n";
     std::cout << "\tNumber of activities: " << stats.total_activities() << std::endl;
-    std::cout << "\tTime spent: " << stats.total_time() << " seconds" << std::endl;
+    std::cout << "\tTime spent: " << toDuration(std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::seconds(stats.total_time()))) << std::endl;
     std::cout << "\tTotal distance: " << m_to_miles(stats.total_distance()) << " miles" << std::endl;
     std::cout << "\tTotla climbing: " << m_to_ft(stats.total_ascent()) << " feet" << std::endl;
 
