@@ -5,8 +5,8 @@ import subprocess
 
 LIST_CMD_HEADER_RE = re.compile(r'Retrieved (\d+) activities\:')
 
-#   5fb330eca7180fe8947a8c63 - "Big CC Loop": 24.2352 miles, 3992.12 feet ascent
-LIST_CMD_EMTRY_RE = re.compile(r'\s+(\w+) \- (\d+) "(.*)"')
+#   5fb5d810beefe31440255a22 - October 31, 2020 at 10:35: AM - "Big CC Loop"
+LIST_CMD_EMTRY_RE = re.compile(r'\s+(\w+) \- ([\s\w,:]+) \- "(.*)"')
 
 UPLOAD_CMD_RE = re.compile(r'Successfully uploaded activity file ".*" as activity (\w+)')
 
@@ -156,3 +156,9 @@ def _strToNumber(s):
         return _strToNumber(parts[0])   # yes recursion, but it will only ever be one leve
     return None
 
+if __name__ == "__main__":
+    TEST_DATE_STR = '\t5fb5d810beefe31440255a22 - October 31, 2020 at 10:35: AM - "Big CC Loop"'
+    m = LIST_CMD_EMTRY_RE.match(TEST_DATE_STR)
+    print(m)
+    if m:
+        print(m.groups())

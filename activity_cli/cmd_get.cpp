@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 
 #include "activity_log.h"
+#include "datetime.h"
 #include "units.h"
 
 
@@ -26,11 +27,9 @@ int GetCommandHandler::runCommand(const std::vector<std::string>& args)
 
     std::cout << "Activity " << activity.id() << std::endl;
     std::cout << boost::format("\tname: %1%\n") % activity.name();
-    // TODO: Make human readable
-    std::cout << boost::format("\tstartTime: %1%\n") % std::chrono::system_clock::to_time_t(activity.startTime());
-    // TODO: Show as HMS
-    std::cout << boost::format("\tduration: %1%\n") % std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count();
-    std::cout << boost::format("\tmovingTime: %1%\n") % std::chrono::duration_cast<std::chrono::seconds>(activity.movingTime()).count();
+    std::cout << boost::format("\tstartTime: %1%\n") % toTimeString(activity.startTime());
+    std::cout << boost::format("\tduration: %1%\n") % toDuration(activity.duration());
+    std::cout << boost::format("\tmovingTime: %1%\n") % toDuration(activity.movingTime());
     std::cout << boost::format("\ttotalDistance: %1% miles\n") % m_to_miles(activity.totalDistance());
     std::cout << boost::format("\ttotalAscent: %1%\n") %m_to_ft(activity.totalAscent());
     std::cout << boost::format("\ttotalDescent: %1% feet\n") % m_to_ft(activity.totalDescent());

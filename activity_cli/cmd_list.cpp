@@ -4,6 +4,7 @@
 #include <boost/format.hpp>
 
 #include "activity_log.h"
+#include "datetime.h"
 #include "units.h"
 
 
@@ -27,8 +28,7 @@ int ListCommandHandler::runCommand(const std::vector<std::string>& args)
     std::cout << boost::format("Retrieved %1% activities:\n") % activities.size();
     for (const auto& activity : activities)
     {
-        // TODO: Make time human-readable
-        std::cout << boost::format("\t%1% - %2% \"%3%\"\n") % activity.id() % std::chrono::system_clock::to_time_t(activity.startTime()) % activity.name();
+        std::cout << boost::format("\t%1% - %2% - \"%3%\"\n") % activity.id() % toTimeString(activity.startTime()) % activity.name();
     }
 
     return 0;

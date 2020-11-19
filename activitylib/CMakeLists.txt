@@ -1,4 +1,5 @@
 add_library(activitylib STATIC
+            datetime.cpp
             fileutils.cpp
             threadfile.cpp)
 
