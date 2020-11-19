@@ -28,7 +28,13 @@ int ListCommandHandler::runCommand(const std::vector<std::string>& args)
     std::cout << boost::format("Retrieved %1% activities:\n") % activities.size();
     for (const auto& activity : activities)
     {
-        std::cout << boost::format("\t%1% - %2% - \"%3%\"\n") % activity.id() % toTimeString(activity.startTime()) % activity.name();
+        std::cout << boost::format("\t%1% - %2% - \"%3%\": %4% miles, %5% feet, %6%\n") %
+                activity.id() %
+                toTimeString(activity.startTime()) %
+                activity.name() %
+                m_to_miles(activity.totalDistance()) %
+                m_to_ft(activity.totalAscent()) %
+                toDuration(activity.duration());
     }
 
     return 0;

@@ -23,6 +23,8 @@ message Activity {
     float average_climbing_grade = 11;
     float average_descending_grade = 12;
     uint64 moving_time = 13;
+    double start_latitude = 14;
+    double start_longitude = 15;
 };
 
 message ActivityFileChunk {

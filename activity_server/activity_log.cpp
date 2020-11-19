@@ -86,7 +86,7 @@ grpc::Status ActivityLog::calculateStats(grpc::ServerContext* context,
     for (auto& [activityId, activity]: activities)
     {
         stats->set_total_activities(stats->total_activities() + 1);
-        stats->set_total_time(stats->total_time() + std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count());
+        stats->set_total_time(stats->total_time() + std::chrono::duration_cast<std::chrono::seconds>(activity.stats.duration).count());
         stats->set_total_distance(stats->total_distance() + activity.stats.total_distance);
         stats->set_total_ascent(stats->total_ascent() + activity.stats.total_ascent);
     }
@@ -285,7 +285,7 @@ void ActivityLog::toProto(const Activity& activity, activity_log::Activity* prot
     // start_time
     protoActivity->set_start_time(std::chrono::system_clock::to_time_t(activity.start_time));
     // duration
-    protoActivity->set_duration(std::chrono::duration_cast<std::chrono::seconds>(activity.duration()).count());
+    protoActivity->set_duration(std::chrono::duration_cast<std::chrono::seconds>(activity.stats.duration).count());
     // moving_time
     protoActivity->set_moving_time(std::chrono::duration_cast<std::chrono::seconds>(activity.stats.movingTime).count());
     // total_distance
@@ -304,4 +304,8 @@ void ActivityLog::toProto(const Activity& activity, activity_log::Activity* prot
     protoActivity->set_average_climbing_grade(activity.stats.average_climbing_grade);
     // average_descending_grade
     protoActivity->set_average_descending_grade(activity.stats.average_descending_grade);
+    // start_latitude
+    protoActivity->set_start_latitude(activity.stats.startLatitude);
+    // start_longitude
+    protoActivity->set_start_longitude(activity.stats.startLongitude);
 }

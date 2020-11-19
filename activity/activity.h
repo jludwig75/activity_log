@@ -19,7 +19,6 @@ public:
     std::string id;
     std::string name;
     std::chrono::system_clock::time_point start_time;
-    std::chrono::system_clock::duration duration() const;
     std::vector<TrackPoint> trackPoints;
     struct ActivityStats
     {
@@ -48,5 +47,8 @@ public:
         double average_climbing_grade;
         double average_descending_grade;
         std::chrono::system_clock::duration movingTime;
+        std::chrono::system_clock::duration duration;
+        double startLongitude;
+        double startLatitude;
     } stats{};
 };

@@ -33,6 +33,12 @@ bool desrializeActivity(bsoncxx::document::view& activityView, Activity& activit
     activity.id = id;
     activity.name = name;
 
+    activity.stats.duration = std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::seconds(activityView["duration"].get_int64().value));
+    activity.stats.total_distance = activityView["totalDistace"].get_double().value;
+    activity.stats.total_ascent = activityView["elevationGain"].get_double().value;
+    activity.stats.startLatitude = activityView["startLatitude"].get_double().value;
+    activity.stats.startLongitude = activityView["startLongitude"].get_double().value;
+
     if (activityView["trackPoints"])
     {
         auto trackPoints = activityView["trackPoints"].get_array().value;
@@ -61,6 +67,11 @@ bsoncxx::document::value serializeActivity(const Activity& activity)
 
     auto inArray = builder << "name" << activity.name
                     << "startTime" << std::chrono::system_clock::to_time_t(activity.start_time)
+                    << "duration" << static_cast<int64_t>(std::chrono::duration_cast<std::chrono::seconds>(activity.stats.duration).count())
+                    << "totalDistace" << activity.stats.total_distance
+                    << "elevationGain" << activity.stats.total_ascent
+                    << "startLatitude" << activity.stats.startLatitude
+                    << "startLongitude" << activity.stats.startLongitude
                     << "trackPoints" << bsoncxx::builder::stream::open_array;
 
     for (const auto& trackPoint : activity.trackPoints)
@@ -156,6 +167,11 @@ bool ActivityDatabase::listActivities(ActivityMap& activities, bool includeTrack
                 "_id" << 1  <<
                 "name" << 1  <<
                 "startTime" << 1 <<
+                "duration" << 1 <<
+                "totalDistace" << 1 <<
+                "elevationGain" << 1 <<
+                "startLatitude" << 1 <<
+                "startLongitude" << 1 <<
                 bsoncxx::builder::stream::finalize);
     }
     auto cursor = db["activities"].find({}, opts);

@@ -31,17 +31,6 @@ bool Activity::operator!=(const Activity& other) const
     return !operator==(other);
 }
 
-
-
-std::chrono::system_clock::duration Activity::duration() const
-{
-    if (trackPoints.empty())
-    {
-        return std::chrono::seconds(0);
-    }
-    return trackPoints.back().time - start_time;
-}
-
 void Activity::analyzeTrackPoints()
 {
     if (trackPoints.empty())
@@ -119,8 +108,12 @@ void Activity::analyzeTrackPoints()
         else if (trackPoint.time ==  activityStartTime)
         {
             stats.average_heart_rate = trackPoint.heartRate;
+            stats.startLatitude = trackPoint.latitude;
+            stats.startLongitude = trackPoint.longitude;
         }
 
         previous = trackPoint;
     }
+
+    stats.duration = trackPoints.back().time - start_time;
 }

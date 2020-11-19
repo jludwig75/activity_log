@@ -6,7 +6,7 @@ import subprocess
 LIST_CMD_HEADER_RE = re.compile(r'Retrieved (\d+) activities\:')
 
 #   5fb5d810beefe31440255a22 - October 31, 2020 at 10:35: AM - "Big CC Loop"
-LIST_CMD_EMTRY_RE = re.compile(r'\s+(\w+) \- ([\s\w,:]+) \- "(.*)"')
+LIST_CMD_EMTRY_RE = re.compile(r'\s+(\w+) \- ([\s\w,:]+) \- "(.*)"\:.*')
 
 UPLOAD_CMD_RE = re.compile(r'Successfully uploaded activity file ".*" as activity (\w+)')
 
@@ -123,6 +123,8 @@ class ActivityLog:
                 continue
             parts = line.strip().split(':')
             key = parts[0]
+            if len(parts) > 2:
+                parts[1] = ':'.join(parts[1:])
             value = parts[1].strip()
             setattr(activity, key, self._strToValue(value))
         return activity

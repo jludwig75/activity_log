@@ -68,9 +68,9 @@ class ActivityLogSystemTest(unittest.TestCase):
         # Validate that activity is a valid activity
         self.assertTrue(len(activity.id) > 0)
         self.assertEqual(activity.name, "Big CC Loop")
-        self.assertEqual(activity.startTime, 'October 31, 2020 at 10')
-        self.assertEqual(activity.duration, 13338)
-        self.assertEqual(activity.movingTime, 12218)
+        self.assertEqual(activity.startTime, 'October 31, 2020 at 10:35: AM')
+        self.assertEqual(activity.duration, '3:42:18')
+        self.assertEqual(activity.movingTime, '3:23:38')
         self.assertEqual(activity.totalDistance, 24.2352)
         self.assertEqual(activity.totalAscent, 3992.12)
         self.assertEqual(activity.totalDescent, 3992.45)
