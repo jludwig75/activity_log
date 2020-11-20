@@ -4,41 +4,52 @@ case "$*" in (*-h*)
 echo "Builds project configs and runs all tests"
 echo "command line options:"
 echo "  -h    shows this screen"
+echo "  -s    run stress tests"
 echo "  -v    runs all configs: release, debug, minimal-size release, release with debug info"
 exit
 esac
 
-mkdir -p build
+pkill -f activity_server
+
+run_stress_tests=0
+case "$*" in (*-s*)
+    run_stress_tests=1
+esac
+
+test_build() {
+    build_config=$1
+    run_stress_tests=$2
+    cmake $build_config ..
+    make clean
+    make -j4
+    make test
+    if [ $run_stress_tests -eq 1 ];
+    then
+        pushd system_tests
+        ../../system_tests/stress_tests.py
+        popd
+    fi
+}
+
+rm -rf build
+mkdir build
 pushd build
 
 echo "=== Testing release build ==="
-cmake ..
-make clean
-make -j4
-make test
+test_build Release $run_stress_tests
 
 case "$*" in (*-v*)
 
-# These builds put some variation in the code for testing
+    echo "=== Testing minimum-size release build ==="
+    test_build MinSizeRel $run_stress_tests
 
-echo "=== Testing minimum-size release build ==="
-cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
-make clean
-make -j4
-make test
+    echo "=== Testing release with debug info build ==="
+    test_build RelWithDebInfo $run_stress_tests
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 
-echo "=== Testing release with debug info build ==="
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-make clean
-make -j4
-make test
-
-esac
+esac # -v
 
 echo "=== Testing debug build ==="
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-make clean
-make -j4
-make test
+test_build Debug $run_stress_tests
 
 popd

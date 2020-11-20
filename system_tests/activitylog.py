@@ -78,6 +78,9 @@ class ActivityLog:
     def deleteAllActivities(self):
         runCmd('deleteall')
 
+    def downloadAllActivities(self):
+        runCmd('downloadall')
+
     def uploadActivity(self, activityFileName):
         output = runCmd('upload ' + activityFileName)
         m = UPLOAD_CMD_RE.match(output)
