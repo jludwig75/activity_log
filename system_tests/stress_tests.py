@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import os
 import re
-import unittest
 import threading
+import unittest
+import sys
 from activitylog import ActivityLog
 from gpxchecks import compareGpxFiles, validateGpxPlot, validateGpxTrack
 
@@ -146,6 +147,7 @@ class ActivityLogSystemTest(unittest.TestCase):
         fileNumber = 1
         for gpxFileName in listGpxFiles('.'):
             print('.', end = '')
+            sys.stdout.flush()
             # print('Validating file %u of %u \"%s\"' % (fileNumber, filesToExpect, gpxFileName))
             m = DOWNLOADED_GPX_FILE_RE.match(gpxFileName)
             self.assertTrue(m != None)
