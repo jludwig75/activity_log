@@ -4,6 +4,7 @@
 
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/post.hpp>
+#include <boost/format.hpp>
 
 #include "activity_log.h"
 #include "cmdutils.h"
@@ -21,8 +22,16 @@ int UploadCommandHandler::runCommand(const std::vector<std::string>& args)
 
     boost::asio::thread_pool threadPool(commandThreadPoolCount());
 
+    bool failCommand = false;
     for (const auto& fileName: args)
     {
+        if (!isValidFilePath(fileName))
+        {
+            std::cout << boost::format("Invalid file path \"%1%\"\n") % fileName;
+            failCommand = true;
+            break;
+        }
+
         boost::asio::post(threadPool, [activityLog, fileName] {
             Activity newActivity;
             if (!activityLog->uploadActivity(fileName, newActivity).ok())
@@ -38,7 +47,7 @@ int UploadCommandHandler::runCommand(const std::vector<std::string>& args)
 
     threadPool.join();
 
-    return 0;
+    return failCommand ? -1 : 0;
 }
 
 std::string UploadCommandHandler::syntax() const

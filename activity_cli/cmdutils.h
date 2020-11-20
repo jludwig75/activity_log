@@ -10,3 +10,5 @@ std::string csvEntry(const T& t)
 }
 
 size_t commandThreadPoolCount();
+
+bool isValidFilePath(const std::string& path);
